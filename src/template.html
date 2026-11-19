@@ -1,0 +1,1432 @@
+<meta charset="utf-8">
+<title>禾林 RICH ONE 基地分析</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
+<style>
+/* Layout: full-bleed 3D site model; chapter text floats left over a fade, data widgets float right, chapter rail along the bottom. */
+:root{
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono","Noto Sans TC","PingFang TC",ui-monospace,monospace;
+  --bg:#F2F2EF; --bgFade:rgba(242,242,239,.94); --bgFade0:rgba(242,242,239,0);
+  --ink:#171717; --ink2:#505255; --ink3:#8A8C8F; --rule:rgba(23,23,23,.15); --btn:rgba(255,255,255,.74); --chip:#E5E5E0; --card:rgba(255,255,255,.82);
+  --land:#EDEDE9; --road:#DFDFDA; --plaza:#F7F7F4; --bldg:#FFFFFF; --edge:#2F3133; --edgeOp:.26;
+  --park:#AFC487; --tree:#86A556; --trunk:#6F6A60; --water:#C4D6DC; --constr:#E9E1CC;
+  --glass:#A7BCC8; --slab:#FFFFFF; --rail:#C9CAC5;
+  --accent:#B06E14; --accentSoft:#F0DDB6; --accentInk:#FFFFFF;
+  --sun:#D99A1E; --sunSoft:#F3D58B; --wind:#2B9384; --windSoft:#B8DCD6;
+  --res:#8FAEBA; --retail:#D7A253; --park2:#5E7F33; --base:#9AA0A4; --roof:#ECECE8;
+  --r2:#6E9BC9; --r3:#2B9384; --r4:#B06E14;
+  --hemiSky:#FFFFFF; --hemiGnd:#D4D5D1; --hemiI:.64; --dirI:.52;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131416; --bgFade:rgba(19,20,22,.94); --bgFade0:rgba(19,20,22,0);
+    --ink:#ECECEC; --ink2:#B3B5B8; --ink3:#7C7F83; --rule:rgba(236,236,236,.16); --btn:rgba(32,34,36,.78); --chip:#26282B; --card:rgba(28,30,32,.86);
+    --land:#1A1B1D; --road:#26282B; --plaza:#202124; --bldg:#3A3D41; --edge:#B5B7BA; --edgeOp:.22;
+    --park:#3D5428; --tree:#56733A; --trunk:#4A4640; --water:#1E3540; --constr:#2E2B24;
+    --glass:#5D7A8B; --slab:#CFCFCF; --rail:#44474B;
+    --accent:#E5A23F; --accentSoft:#4A3A1E; --accentInk:#141414;
+    --sun:#F2B93B; --sunSoft:#6B5A2E; --wind:#4DB8AA; --windSoft:#23413D;
+    --res:#5E8494; --retail:#C38E40; --park2:#86AD58; --base:#5D6266; --roof:#2E3033;
+    --r2:#7FA9D6; --r3:#4DB8AA; --r4:#E5A23F;
+    --hemiSky:#C8CDD6; --hemiGnd:#2A2C2E; --hemiI:.44; --dirI:.42;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131416; --bgFade:rgba(19,20,22,.94); --bgFade0:rgba(19,20,22,0);
+  --ink:#ECECEC; --ink2:#B3B5B8; --ink3:#7C7F83; --rule:rgba(236,236,236,.16); --btn:rgba(32,34,36,.78); --chip:#26282B; --card:rgba(28,30,32,.86);
+  --land:#1A1B1D; --road:#26282B; --plaza:#202124; --bldg:#3A3D41; --edge:#B5B7BA; --edgeOp:.22;
+  --park:#3D5428; --tree:#56733A; --trunk:#4A4640; --water:#1E3540; --constr:#2E2B24;
+  --glass:#5D7A8B; --slab:#CFCFCF; --rail:#44474B;
+  --accent:#E5A23F; --accentSoft:#4A3A1E; --accentInk:#141414;
+  --sun:#F2B93B; --sunSoft:#6B5A2E; --wind:#4DB8AA; --windSoft:#23413D;
+  --res:#5E8494; --retail:#C38E40; --park2:#86AD58; --base:#5D6266; --roof:#2E3033;
+  --r2:#7FA9D6; --r3:#4DB8AA; --r4:#E5A23F;
+  --hemiSky:#C8CDD6; --hemiGnd:#2A2C2E; --hemiI:.44; --dirI:.42;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+#app{position:fixed;inset:0;overflow:hidden}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;outline:none}
+#gl.drag{cursor:grabbing}
+#fade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,var(--bgFade) 0%,var(--bgFade) 22%,var(--bgFade0) 44%)}
+#fadeR{position:absolute;inset:0;pointer-events:none;background:linear-gradient(270deg,var(--bgFade) 0%,var(--bgFade0) 24%);opacity:0;transition:opacity .5s}
+#app.has-side #fadeR{opacity:1}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.webgl-fail{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink3);font-size:13px}
+
+/* top bar */
+.top{position:absolute;top:calc(env(safe-area-inset-top,0px) + 18px);left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px));pointer-events:none}
+.brand{display:flex;align-items:center;gap:12px;font-size:12.5px;letter-spacing:.04em;pointer-events:auto}
+.brand b{font-weight:700;letter-spacing:.06em}
+.brand i{font-style:normal;color:var(--ink2);border-left:1px solid var(--rule);padding-left:12px}
+.ctrls{display:flex;gap:6px;pointer-events:auto}
+.btn{border:1px solid var(--rule);background:var(--btn);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:3px;padding:6px 11px;font-size:12px;cursor:pointer;letter-spacing:.04em}
+.btn:hover{border-color:var(--ink3)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:focus-visible,.navb:focus-visible,.seg button:focus-visible,.tl-item:focus-visible,input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* chapter panel */
+#ui{position:absolute;inset:0;pointer-events:none}
+#panel{position:absolute;left:max(32px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 76px);bottom:calc(env(safe-area-inset-bottom,0px) + 92px);
+  width:min(392px,34vw);overflow-y:auto;scrollbar-width:none;pointer-events:auto;display:flex;flex-direction:column;gap:18px;padding-right:6px}
+#panel::-webkit-scrollbar{display:none}
+#side{position:absolute;right:max(32px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 76px);width:300px;max-height:calc(100% - 200px);overflow-y:auto;scrollbar-width:none;pointer-events:auto;display:flex;flex-direction:column;gap:14px}
+#side::-webkit-scrollbar{display:none}
+.in{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:.15;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.in{animation:none}}
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink2);letter-spacing:.06em}
+.eyebrow .num{font-family:var(--mono);font-size:11px;background:var(--ink);color:var(--bg);padding:2px 7px;border-radius:2px}
+.kicker{margin:0;font-size:12.5px;color:var(--ink2);border:1px solid var(--rule);padding:6px 10px;align-self:flex-start;border-radius:2px;background:var(--btn)}
+h1{margin:0;font-weight:300;font-size:clamp(30px,3.1vw,46px);line-height:1.24;letter-spacing:.03em;text-wrap:balance}
+h1 em{font-style:normal;font-weight:500}
+.sub{margin:-6px 0 0;font-size:15px;color:var(--ink2);letter-spacing:.04em}
+.lead{font-size:14.5px;line-height:1.85;color:var(--ink2);max-width:36em}
+.lead p{margin:0 0 .6em}
+.lead b{color:var(--ink);font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;border-top:1px solid var(--rule);padding-top:16px}
+.stat b{display:block;font-family:var(--mono);font-weight:300;font-size:30px;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat b i{font-style:normal;font-size:12px;margin-left:3px;color:var(--ink2);letter-spacing:0}
+.stat span{display:block;margin-top:6px;font-size:11.5px;line-height:1.5;color:var(--ink3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;border:1px solid var(--rule);padding:4px 9px;border-radius:2px;background:var(--btn)}
+.chip.acc{border-color:var(--accent);color:var(--accent)}
+.hint{font-size:12px;color:var(--ink3);margin:0}
+.foot{margin:auto 0 0;font-size:11px;line-height:1.7;color:var(--ink3);border-top:1px solid var(--rule);padding-top:10px}
+.foot a{color:inherit}
+.legend{display:flex;flex-direction:column;gap:7px;font-size:12.5px;border-top:1px solid var(--rule);padding-top:14px}
+.legend div{display:flex;align-items:center;gap:10px}
+.legend small{color:var(--ink3);font-size:11.5px;margin-left:auto;text-align:right}
+.sw{width:22px;height:12px;border-radius:2px;flex:none;border:1px solid var(--rule)}
+.sw.line{height:0;border:none;border-top:2px solid}
+.sw.dash{height:0;border:none;border-top:2px dashed}
+.blist{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none;font-size:13px;line-height:1.65;color:var(--ink2)}
+.blist li{display:grid;grid-template-columns:auto 1fr;gap:10px}
+.blist li::before{content:"";width:8px;height:8px;border:1.5px solid var(--ink);border-radius:50%;margin-top:6px}
+.blist b{color:var(--ink);font-weight:500}
+
+/* timeline list */
+.tl{display:flex;flex-direction:column;gap:2px;border-left:1px solid var(--rule);margin-left:4px}
+.tl-item{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;text-align:left;border:0;background:none;padding:5px 0 5px 0;cursor:pointer;position:relative}
+.tl-item::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink3);margin-left:-5px;margin-top:4px}
+.tl-item.on::before{background:var(--accent);border-color:var(--accent)}
+.tl-item.past::before{border-color:var(--ink)}
+.tl-item .y{font-family:var(--mono);font-size:12px;color:var(--ink3);display:block}
+.tl-item.on .y{color:var(--accent)}
+.tl-item .t{font-size:13px;display:block;color:var(--ink2)}
+.tl-item.on .t{color:var(--ink);font-weight:500}
+
+/* side cards */
+.card{background:var(--card);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card h3{margin:0;font-size:12px;font-weight:500;letter-spacing:.06em;color:var(--ink2)}
+.bigyear{font-family:var(--mono);font-weight:300;font-size:40px;line-height:1;letter-spacing:-.01em}
+.card .ttl{font-size:15px;font-weight:500}
+.card p{margin:0;font-size:13px;line-height:1.75;color:var(--ink2)}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.seg button{flex:1;border:0;background:transparent;padding:7px 4px;font-size:12px;cursor:pointer;border-right:1px solid var(--rule)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.readout div b{display:block;font-family:var(--mono);font-weight:300;font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums}
+.readout div span{font-size:11px;color:var(--ink3)}
+.slider-row{display:flex;align-items:center;gap:10px}
+.slider-row .btn{padding:5px 9px;min-width:34px}
+input[type=range]{flex:1;accent-color:var(--accent);min-width:0}
+.meta{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:86px 1fr 46px;align-items:center;gap:8px;font-size:12px}
+.bar .tr{height:8px;background:var(--chip);border-radius:1px;overflow:hidden}
+.bar .tr i{display:block;height:100%;background:var(--sun)}
+.bar em{font-style:normal;font-family:var(--mono);font-size:11.5px;text-align:right;font-variant-numeric:tabular-nums}
+svg text{font-family:var(--mono)}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:2px}
+.months div{text-align:center;font-family:var(--mono);font-size:9.5px;padding:5px 0;border-radius:1px}
+.months .ne{background:var(--wind);color:var(--bg)}
+.months .sw2{background:var(--accent);color:var(--accentInk)}
+.mlab{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3)}
+.sumgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;border-top:1px solid var(--rule);padding-top:16px}
+.sumgrid div b{display:block;font-family:var(--mono);font-weight:300;font-size:26px;line-height:1.15;white-space:nowrap}
+.sumgrid div span{font-size:11.5px;color:var(--ink3);line-height:1.5;display:block;margin-top:4px}
+.src{margin:0;padding:0;list-style:none;font-size:11.5px;line-height:1.65;color:var(--ink3);display:flex;flex-direction:column;gap:5px}
+.src a{color:var(--ink2)}
+
+/* labels */
+.lbl{position:absolute;left:0;top:0;will-change:transform;pointer-events:none}
+.lbl .tx{position:absolute;left:0;bottom:var(--stem,28px);transform:translateX(-50%);white-space:nowrap;font-size:11.5px;line-height:1.35;color:var(--ink);text-align:center;
+  text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 6px var(--bg)}
+.lbl .tx small{display:block;font-size:10.5px;color:var(--ink2)}
+.lbl .stem{position:absolute;left:-.5px;bottom:0;width:1px;height:var(--stem,28px);background:var(--ink);opacity:.8}
+.lbl .stem::after{content:"";position:absolute;left:-2px;bottom:-2px;width:5px;height:5px;border-radius:50%;background:var(--ink)}
+.lbl.box .tx{background:var(--ink);color:var(--bg);text-shadow:none;padding:3px 8px;border-radius:2px}
+.lbl.box .tx small{color:var(--bg);opacity:.75}
+.lbl.acc .tx{background:var(--accent);color:var(--accentInk);text-shadow:none;padding:3px 8px;border-radius:2px}
+.lbl.acc .tx small{color:var(--accentInk);opacity:.8}
+.lbl.acc .stem,.lbl.acc .stem::after{background:var(--accent)}
+.lbl.wind .tx{color:var(--wind);font-weight:500}
+.lbl.wind .stem,.lbl.wind .stem::after{background:var(--wind)}
+.lbl.tag .tx{bottom:auto;top:0;transform:translate(-50%,-50%)}
+.lbl.tag .stem{display:none}
+.lbl.road .tx{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--ink2)}
+.lbl.ring .tx{font-family:var(--mono);font-size:10.5px;color:var(--ink2);background:var(--btn);padding:1px 5px;border:1px solid var(--rule);text-shadow:none;border-radius:2px}
+.lbl.cmp .tx{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--sun)}
+
+/* nav */
+#nav{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;align-items:center;gap:14px;
+  padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px))}
+#chapters{flex:1;min-width:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-top:1px solid var(--rule)}
+#chapters::-webkit-scrollbar{display:none}
+.navb{flex:1 0 auto;border:0;background:none;cursor:pointer;padding:9px 6px 2px;text-align:left;font-size:11.5px;color:var(--ink3);white-space:nowrap;position:relative}
+.navb span{font-family:var(--mono);font-size:10.5px;margin-right:5px}
+.navb::before{content:"";position:absolute;left:0;right:0;top:-1px;height:2px;background:transparent}
+.navb[aria-current="step"]{color:var(--ink)}
+.navb[aria-current="step"]::before{background:var(--ink)}
+.navb:hover{color:var(--ink)}
+.arrows{display:flex;gap:4px}
+.arrows .btn{padding:5px 10px;font-family:var(--mono)}
+#compass{position:absolute;right:max(32px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 70px);width:40px;height:40px;pointer-events:none}
+#scale{position:absolute;right:calc(max(32px,env(safe-area-inset-right,0px)) + 56px);bottom:calc(env(safe-area-inset-bottom,0px) + 80px);font-family:var(--mono);font-size:10.5px;color:var(--ink2);pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+#scale i{display:block;height:5px;border:1px solid var(--ink2);border-top:0}
+#draghint{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);transform:translateX(-50%);font-size:11.5px;color:var(--ink2);border:1px solid var(--rule);background:var(--btn);padding:5px 12px;border-radius:2px;pointer-events:none;transition:opacity .6s}
+
+/* narrow screens: model on top, chapter sheet below */
+@media (max-width: 820px){
+  #fade{background:linear-gradient(0deg,var(--bg) 0%,var(--bg) 46%,var(--bgFade0) 60%)}
+  #fadeR{display:none}
+  .top{top:calc(env(safe-area-inset-top,0px) + 10px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .brand i{display:none}
+  .btn{padding:5px 8px;font-size:11.5px}
+  #ui{position:absolute;left:0;right:0;top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 52px);height:50%;overflow-y:auto;pointer-events:auto;
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 18px;display:flex;flex-direction:column;gap:16px;
+    border-top:1px solid var(--rule);background:var(--bg)}
+  #panel,#side{position:static;width:auto;max-height:none;overflow:visible;padding:0}
+  #panel{gap:14px}
+  h1{font-size:26px}
+  .stat b{font-size:22px}
+  .foot{margin-top:4px}
+  #nav{bottom:calc(env(safe-area-inset-bottom,0px) + 6px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));gap:8px}
+  .navb{flex:0 0 auto}
+  #compass{right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 52px);bottom:auto;width:34px;height:34px}
+  #scale{display:none}
+  #draghint{display:none}
+}
+</style>
+
+<div id="app">
+  <canvas id="gl" tabindex="-1" aria-label="禾林 RICH ONE 周邊三維模型，可拖曳旋轉"></canvas>
+  <div id="fade"></div><div id="fadeR"></div>
+  <div id="labels" aria-hidden="true"></div>
+  <header class="top">
+    <div class="brand"><b>禾林 RICH ONE</b><i>青埔・基地環境分析</i></div>
+    <div class="ctrls">
+      <button class="btn" id="bAuto" aria-pressed="false">自動播放</button>
+      <button class="btn" id="bTheme" aria-label="切換明暗">明暗</button>
+      <button class="btn" id="bFull">全螢幕</button>
+    </div>
+  </header>
+  <div id="ui">
+    <section id="panel" aria-live="polite"></section>
+    <aside id="side" hidden></aside>
+  </div>
+  <svg id="compass" viewBox="-20 -20 40 40" aria-hidden="true"><circle r="18" style="fill:var(--btn);stroke:var(--rule)"/><g id="needle"><path d="M0-11 L3.6 2 L0 0 L-3.6 2Z" style="fill:var(--ink)"/><path d="M0 11 L3.6 2 L0 0 L-3.6 2Z" style="fill:var(--ink3);opacity:.5"/><text y="-12.5" x="0" font-size="6.5" text-anchor="middle" style="fill:var(--ink)">N</text></g></svg>
+  <div id="scale"><span id="scaleT">100 m</span><i id="scaleB" style="width:60px"></i></div>
+  <div id="draghint">在模型上拖曳可旋轉視角・滾輪縮放</div>
+  <nav id="nav" aria-label="章節">
+    <div id="chapters"></div>
+    <div class="arrows"><button class="btn" id="bPrev" aria-label="上一章">←</button><button class="btn" id="bNext" aria-label="下一章">→</button></div>
+  </nav>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script id="scene-data" type="application/json">/*SCENE_DATA*/</script>
+<script id="wind-data" type="application/json">/*WIND_DATA*/</script>
+<script>
+(function(){
+'use strict';
+/* ============================================================
+   DATA
+   ============================================================ */
+const SCENE = JSON.parse(document.getElementById('scene-data').textContent);
+const WIND = JSON.parse(document.getElementById('wind-data').textContent);
+const DEG = Math.PI/180;
+const LAT = 25.0079, LON = 121.2198;
+
+// Site frame: origin at the 青商路 × 高鐵站前西路二段 intersection; u runs NE along 青商路, v runs SE into the block.
+const C0=[-57,-7], UU=[0.673,0.740], VV=[0.740,-0.673];
+const uv=(u,v)=>[C0[0]+u*UU[0]+v*VV[0], C0[1]+u*UU[1]+v*VV[1]];
+const toUV=(x,y)=>{const dx=x-C0[0],dy=y-C0[1];return [dx*UU[0]+dy*UU[1], dx*VV[0]+dy*VV[1]];};
+const W3=(x,y,h)=>new THREE.Vector3(x,h||0,-y);
+const H1=4.5, HT=3.3;
+const floorBase=k=>k<=1?0:H1+(k-2)*HT;
+const towerH=f=>H1+(f-1)*HT;
+const TW={
+  A:{floors:22,u:[19,36],v:[16,56]},
+  B:{floors:21,u:[44,96],v:[16,32]}
+};
+const CENTER=uv(58,40);
+const SITE_UV=[12,103,10,70];
+
+const PLACES={
+  hsr:{xy:[-570,647],name:'高鐵桃園站',sub:'機場捷運 A18 共站'},
+  gloria:{xy:[-577,816],name:'華泰名品城',sub:'Gloria Outlets'},
+  ikea:{xy:[-256,609],name:'IKEA 青埔店'},
+  park:{xy:[-19,130],name:'青埔公七公園',sub:'約 1.23 ha'},
+  cathay:{xy:[-278,380],name:'站前開發用地',sub:'國泰人壽・約 3.2 萬坪'},
+  field:{xy:[222,194],name:'青埔足球場'},
+  pond:{xy:[-107,-612],name:'青埔大埤'}
+};
+
+// 591 實價登錄 — latest 20 records (2026-11-11 update). [date, 青商路門牌, floor, rooms, 坪, 萬/坪, special]
+const TX=[
+ ['2026-06-22',282,7,'3房',44.9,64.6,0],['2026-05-03',270,13,'2房',42.5,63.9,0],['2026-01-10',270,20,'2房',35.8,62.8,0],
+ ['2025-11-08',266,15,'2房',32.8,69.2,0],['2025-10-18',262,21,'2房',8.7,47.4,1],['2025-10-15',278,18,'4房',44.9,43.7,0],
+ ['2025-10-15',276,18,'4房',45.2,43.7,0],['2025-04-06',258,10,'2房',28.6,67.9,0],['2025-03-14',280,9,'3房',44.9,58.5,0],
+ ['2024-10-23',256,13,'2房',28.3,65.6,0],['2024-09-22',282,6,'2房',44.9,71.0,0],['2024-07-07',258,15,'2房',28.5,69.0,0],
+ ['2024-05-13',270,18,'3房',42.5,43.0,1],['2024-05-03',260,8,'2房',28.6,63.4,0],['2024-03-31',270,6,'3房',46.3,55.4,0],
+ ['2024-03-01',286,8,'2房',45.1,51.6,0],['2024-02-07',266,12,'3房',32.8,36.0,1],['2024-01-19',286,7,'3房',45.1,57.3,0],
+ ['2024-01-02',272,4,'2房',36.3,57.1,0],['2023-08-07',256,20,'2房',28.3,57.9,0]
+];
+const txTower=no=>no>=276?'A':'B';
+
+const TIMELINE=[
+ {y:'2007.01',t:'高鐵桃園站通車',d:'青埔高鐵特定區開發的起點。車站位於本案西北方約 860 公尺。',at:'hsr'},
+ {y:'2014.01',t:'預售期首筆成交',d:'實價登錄中最早的一筆，單價約 29.5 萬/坪，也是本案歷史最低。',at:'site'},
+ {y:'2015',t:'華泰名品城開幕',d:'青埔最早進駐的大型商場之一，位於車站西北側。',at:'gloria'},
+ {y:'2017.03',t:'機場捷運通車',d:'A18 高鐵桃園站與高鐵共站，青埔同時有高鐵與機捷。',at:'hsr'},
+ {y:'2017.12',t:'本案建築完成',d:'實價登錄記載的建築完成日為 2017-12-25。A 棟 22F、B 棟 21F，共 208 戶。',at:'site'},
+ {y:'2019.05',t:'歷史最高成交',d:'單價 80.0 萬/坪，是 591 實價登錄中本案的最高紀錄。',at:'site'},
+ {y:'2020.07',t:'IKEA 青埔店開幕',d:'開幕時為全台最大的 IKEA 單店，距本案約 660 公尺。',at:'ikea'},
+ {y:'2025.09',t:'國泰站前開發動土',d:'高鐵桃園站前約 3.2 萬坪基地動土，規劃 5 棟複合大樓。',at:'cathay'},
+ {y:'2030',t:'站前開發預計完工',d:'引進百貨商場、辦公與星級飯店，基地最近處距本案約 190 公尺。',at:'cathay'}
+];
+
+/* ============================================================
+   THEME
+   ============================================================ */
+const root=document.documentElement;
+const tok=n=>getComputedStyle(root).getPropertyValue(n).trim();
+function isDark(){const t=root.getAttribute('data-theme'); if(t) return t==='dark'; return matchMedia('(prefers-color-scheme: dark)').matches;}
+
+/* ============================================================
+   RENDERER
+   ============================================================ */
+const canvas=document.getElementById('gl');
+const app=document.getElementById('app');
+let renderer;
+try{
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+}catch(e){ renderer=null; }
+const NARROW=()=>innerWidth<=820;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(30,1,2,9000);
+scene.fog=new THREE.Fog(0xffffff,1500,4000);
+const hemi=new THREE.HemisphereLight(0xffffff,0xcccccc,.8); scene.add(hemi);
+const sunL=new THREE.DirectionalLight(0xffffff,.6); scene.add(sunL); scene.add(sunL.target);
+if(renderer){
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  sunL.castShadow=true;
+  const ms=(innerWidth<900||/Mobi|Android/i.test(navigator.userAgent))?2048:4096;
+  sunL.shadow.mapSize.set(ms,ms);
+  const sc=sunL.shadow.camera; sc.left=-430; sc.right=430; sc.top=430; sc.bottom=-430; sc.near=10; sc.far=2600; sc.updateProjectionMatrix();
+  sunL.shadow.bias=-0.0006; if('normalBias' in sunL.shadow) sunL.shadow.normalBias=0.6;
+}else{
+  const d=document.createElement('div'); d.className='webgl-fail'; d.textContent='此裝置無法顯示三維模型，章節內容仍可閱讀。'; app.insertBefore(d,canvas.nextSibling);
+}
+sunL.target.position.copy(W3(CENTER[0],CENTER[1],0));
+
+/* ============================================================
+   GEOMETRY HELPERS
+   ============================================================ */
+function newBuf(){return {p:[],n:[],e:[]};}
+function tri(b,a,c,d,nrm){b.p.push(...a,...c,...d); for(let i=0;i<3;i++) b.n.push(...nrm);}
+function triUp(b,a,c,d){ // auto-wind to face +Y
+  const ux=c[0]-a[0],uz=c[2]-a[2],vx=d[0]-a[0],vz=d[2]-a[2];
+  if(uz*vx-ux*vz<0) tri(b,a,d,c,[0,1,0]); else tri(b,a,c,d,[0,1,0]);
+}
+function triDown(b,a,c,d){
+  const ux=c[0]-a[0],uz=c[2]-a[2],vx=d[0]-a[0],vz=d[2]-a[2];
+  if(uz*vx-ux*vz>0) tri(b,a,d,c,[0,-1,0]); else tri(b,a,c,d,[0,-1,0]);
+}
+function clean(pts){
+  const o=[]; for(const p of pts){const q=o[o.length-1]; if(!q||Math.hypot(p[0]-q[0],p[1]-q[1])>0.05) o.push(p);}
+  if(o.length>2){const a=o[0],z=o[o.length-1]; if(Math.hypot(a[0]-z[0],a[1]-z[1])<0.05) o.pop();}
+  return o;
+}
+function ccw(pts){let a=0; for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[(i+1)%pts.length]; a+=p[0]*q[1]-q[0]*p[1];} return a>=0?pts:pts.slice().reverse();}
+function polyArea(pts){let a=0; for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[(i+1)%pts.length]; a+=p[0]*q[1]-q[0]*p[1];} return Math.abs(a)/2;}
+function extrude(b,pts,h0,h1,opt){
+  pts=ccw(clean(pts)); const n=pts.length; if(n<3) return;
+  for(let i=0;i<n;i++){
+    const a=pts[i],c=pts[(i+1)%n]; const dx=c[0]-a[0],dy=c[1]-a[1],L=Math.hypot(dx,dy); if(L<1e-3) continue;
+    const nr=[dy/L,0,dx/L];
+    const A0=[a[0],h0,-a[1]],B0=[c[0],h0,-c[1]],B1=[c[0],h1,-c[1]],A1=[a[0],h1,-a[1]];
+    tri(b,A0,B0,B1,nr); tri(b,A0,B1,A1,nr);
+    if(!(opt&&opt.noEdges)){
+      b.e.push(a[0],h1,-a[1],c[0],h1,-c[1]);
+      const pv=pts[(i-1+n)%n]; const ex=a[0]-pv[0],ey=a[1]-pv[1],eL=Math.hypot(ex,ey);
+      if(eL>1e-3){const cos=(ex*dx+ey*dy)/(eL*L); if(cos<0.94) b.e.push(a[0],h0,-a[1],a[0],h1,-a[1]);}
+    }
+  }
+  let tris; try{tris=THREE.ShapeUtils.triangulateShape(pts.map(p=>new THREE.Vector2(p[0],p[1])),[]);}catch(e){tris=[];}
+  for(const t of tris){
+    triUp(b,[pts[t[0]][0],h1,-pts[t[0]][1]],[pts[t[1]][0],h1,-pts[t[1]][1]],[pts[t[2]][0],h1,-pts[t[2]][1]]);
+    if(opt&&opt.bottom) triDown(b,[pts[t[0]][0],h0,-pts[t[0]][1]],[pts[t[1]][0],h0,-pts[t[1]][1]],[pts[t[2]][0],h0,-pts[t[2]][1]]);
+  }
+}
+function flat(b,pts,y){
+  pts=ccw(clean(pts)); if(pts.length<3) return;
+  let tris; try{tris=THREE.ShapeUtils.triangulateShape(pts.map(p=>new THREE.Vector2(p[0],p[1])),[]);}catch(e){return;}
+  for(const t of tris) triUp(b,[pts[t[0]][0],y,-pts[t[0]][1]],[pts[t[1]][0],y,-pts[t[1]][1]],[pts[t[2]][0],y,-pts[t[2]][1]]);
+}
+function ribbon(b,line,w,y,caps){
+  const hw=w/2;
+  for(let i=0;i<line.length-1;i++){
+    const a=line[i],c=line[i+1]; const dx=c[0]-a[0],dy=c[1]-a[1],L=Math.hypot(dx,dy); if(L<1e-3) continue;
+    const nx=-dy/L*hw, ny=dx/L*hw;
+    const p1=[a[0]+nx,y,-(a[1]+ny)],p2=[a[0]-nx,y,-(a[1]-ny)],p3=[c[0]-nx,y,-(c[1]-ny)],p4=[c[0]+nx,y,-(c[1]+ny)];
+    triUp(b,p1,p2,p3); triUp(b,p1,p3,p4);
+  }
+  if(caps!==false){
+    for(let i=1;i<line.length-1;i++){
+      const p=line[i]; const k=8; const ctr=[p[0],y,-p[1]];
+      for(let j=0;j<k;j++){const a0=j/k*2*Math.PI,a1=(j+1)/k*2*Math.PI;
+        triUp(b,ctr,[p[0]+Math.cos(a0)*hw,y,-(p[1]+Math.sin(a0)*hw)],[p[0]+Math.cos(a1)*hw,y,-(p[1]+Math.sin(a1)*hw)]);}
+    }
+  }
+}
+function geomOf(b){
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(b.p,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(b.n,3));
+  return g;
+}
+function edgesOf(b){const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(b.e,3)); return g;}
+function lineGeom(pts,y){const a=[]; for(const p of pts) a.push(p[0],y,-p[1]); const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(a,3)); return g;}
+function rectUV(u0,u1,v0,v1){return [uv(u0,v0),uv(u1,v0),uv(u1,v1),uv(u0,v1)];}
+function pip(x,y,poly){let c=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j]; if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]) c=!c;} return c;}
+function rng(seed){let s=seed>>>0||1; return ()=>{s^=s<<13; s^=s>>>17; s^=s<<5; return ((s>>>0)%100000)/100000;};}
+
+/* ============================================================
+   MATERIALS (colours refreshed from CSS tokens)
+   ============================================================ */
+const M={
+  ground:new THREE.MeshLambertMaterial(),
+  road:new THREE.MeshLambertMaterial(),
+  plaza:new THREE.MeshLambertMaterial(),
+  park:new THREE.MeshLambertMaterial(),
+  parkHi:new THREE.MeshLambertMaterial({transparent:true,opacity:0}),
+  water:new THREE.MeshLambertMaterial(),
+  constr:new THREE.MeshLambertMaterial(),
+  bldg:new THREE.MeshLambertMaterial(),
+  edge:new THREE.LineBasicMaterial({transparent:true}),
+  tree:new THREE.MeshLambertMaterial(),
+  trunk:new THREE.MeshLambertMaterial(),
+  glass:new THREE.MeshPhongMaterial({transparent:true,opacity:.66,shininess:90}),
+  glassA:new THREE.MeshPhongMaterial({transparent:true,opacity:.66,shininess:90}),
+  slab:new THREE.MeshLambertMaterial(),
+  tEdge:new THREE.LineBasicMaterial({transparent:true,opacity:.55}),
+  retail:new THREE.MeshLambertMaterial({transparent:true,opacity:.9}),
+  roof:new THREE.MeshLambertMaterial(),
+  pool:new THREE.MeshPhongMaterial({shininess:120}),
+  court:new THREE.MeshLambertMaterial(),
+  rail:new THREE.MeshLambertMaterial(),
+  accentLine:new THREE.LineDashedMaterial({dashSize:4,gapSize:3}),
+  ringLine:new THREE.LineDashedMaterial({dashSize:6,gapSize:6,transparent:true,opacity:.7}),
+  route:new THREE.MeshBasicMaterial(),
+  routeDot:new THREE.MeshBasicMaterial(),
+  ghost:new THREE.MeshLambertMaterial({transparent:true,opacity:.28,depthWrite:false}),
+  ghostEdge:new THREE.LineBasicMaterial({transparent:true,opacity:.9}),
+  parcel:new THREE.MeshBasicMaterial({transparent:true,opacity:.22,depthWrite:false}),
+  base:new THREE.MeshBasicMaterial({transparent:true,opacity:.42,depthTest:false,depthWrite:false}),
+  baseEdge:new THREE.LineBasicMaterial({transparent:true,opacity:.9,depthTest:false}),
+  windLine:new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.95}),
+  sunLine:new THREE.LineBasicMaterial(),
+  sunBall:new THREE.MeshBasicMaterial(),
+  marker:new THREE.MeshBasicMaterial({transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false}),
+  compassLine:new THREE.LineBasicMaterial({transparent:true,opacity:.5})
+};
+const COL={};
+function applyTheme(){
+  const c=n=>new THREE.Color(tok(n));
+  ['bg','land','road','plaza','park','tree','trunk','water','constr','bldg','edge','glass','slab','accent','sun','wind','windSoft','res','retail','base','roof','park2','rail','ink','ink3','r2','r3','r4','accentSoft','sunSoft'].forEach(k=>COL[k]=c('--'+k));
+  scene.background=COL.bg.clone(); scene.fog.color.copy(COL.bg);
+  M.ground.color.copy(COL.land); M.road.color.copy(COL.road); M.plaza.color.copy(COL.plaza);
+  M.park.color.copy(COL.park); M.parkHi.color.copy(COL.park2); M.water.color.copy(COL.water); M.constr.color.copy(COL.constr);
+  M.bldg.color.copy(COL.bldg); M.edge.color.copy(COL.edge); M.edge.opacity=parseFloat(tok('--edgeOp'))||.25;
+  M.tree.color.copy(COL.tree); M.trunk.color.copy(COL.trunk);
+  M.glass.color.copy(COL.glass); M.glass.specular=new THREE.Color(isDark()?0x333333:0x888888);
+  M.glassA.color.copy(COL.glass); M.glassA.specular=M.glass.specular;
+  M.slab.color.copy(COL.slab); M.tEdge.color.copy(COL.ink); M.retail.color.copy(COL.retail); M.roof.color.copy(COL.roof);
+  M.pool.color.copy(isDark()?new THREE.Color(0x3d6f80):new THREE.Color(0x9fd0de)); M.court.color.copy(COL.park);
+  M.rail.color.copy(COL.rail);
+  M.accentLine.color.copy(COL.accent); M.ringLine.color.copy(COL.ink3);
+  M.route.color.copy(COL.accent); M.routeDot.color.copy(COL.accent);
+  M.ghost.color.copy(COL.accent); M.ghostEdge.color.copy(COL.accent); M.parcel.color.copy(COL.accent);
+  M.base.color.copy(COL.base); M.baseEdge.color.copy(COL.ink);
+  M.sunLine.color.copy(COL.sun); M.sunBall.color.copy(COL.sun); M.marker.color.copy(COL.accent); M.compassLine.color.copy(COL.ink3);
+  hemi.color.set(tok('--hemiSky')); hemi.groundColor.set(tok('--hemiGnd')); hemi.intensity=parseFloat(tok('--hemiI'));
+  baseDirI=parseFloat(tok('--dirI')); hemiBase=parseFloat(tok('--hemiI'));
+  if(window.__stack) recolorStack();
+  if(window.__tx) recolorTx();
+  if(wind) wind.recolor();
+}
+let baseDirI=.6, hemiBase=.8;
+
+/* ============================================================
+   SCENE BUILD
+   ============================================================ */
+const G={}; // layer groups
+function group(name){const g=new THREE.Group(); g.name=name; scene.add(g); G[name]=g; return g;}
+
+// ground
+{
+  const g=new THREE.Mesh(new THREE.CircleGeometry(5200,64),M.ground); g.rotation.x=-Math.PI/2; g.receiveShadow=true; scene.add(g);
+}
+// spatial index for building footprints
+const GRID=40, gidx=new Map();
+const gkey=(i,j)=>i+','+j;
+const SITE_POLY=rectUV(SITE_UV[0],SITE_UV[1],SITE_UV[2],SITE_UV[3]);
+function insideSite(x,y){const [u,v]=toUV(x,y); return u>SITE_UV[0]-2&&u<SITE_UV[1]+2&&v>SITE_UV[2]-2&&v<SITE_UV[3]+2;}
+const ctxB=[];
+for(const b of SCENE.buildings){
+  const cx=b.p.reduce((s,p)=>s+p[0],0)/b.p.length, cy=b.p.reduce((s,p)=>s+p[1],0)/b.p.length;
+  if(insideSite(cx,cy)) continue;
+  if(Math.hypot(cx,cy)>1000) continue;
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; for(const p of b.p){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);}
+  const rec={p:b.p,h:b.h,bb:[x0,x1,y0,y1],c:[cx,cy],n:b.n,t:b.t};
+  ctxB.push(rec);
+  for(let i=Math.floor(x0/GRID);i<=Math.floor(x1/GRID);i++) for(let j=Math.floor(y0/GRID);j<=Math.floor(y1/GRID);j++){const k=gkey(i,j); if(!gidx.has(k)) gidx.set(k,[]); gidx.get(k).push(rec);}
+}
+function inBuilding(x,y,m){
+  m=m||0; const list=gidx.get(gkey(Math.floor(x/GRID),Math.floor(y/GRID))); if(!list) return false;
+  for(const r of list){ if(x<r.bb[0]-m||x>r.bb[1]+m||y<r.bb[2]-m||y>r.bb[3]+m) continue; if(m>0) return true; if(pip(x,y,r.p)) return true; }
+  return false;
+}
+// context buildings
+{
+  const b=newBuf();
+  for(const r of ctxB) extrude(b,r.p,0,r.h);
+  const mesh=new THREE.Mesh(geomOf(b),M.bldg); mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh);
+  const e=new THREE.LineSegments(edgesOf(b),M.edge); scene.add(e);
+}
+// roads
+const roadPolys=[];
+{
+  const b=newBuf();
+  for(const r of SCENE.roads){ if(r.p.every(p=>Math.hypot(p[0],p[1])>1500)) continue; ribbon(b,r.p,r.w,0.35); roadPolys.push(r); }
+  const m=new THREE.Mesh(geomOf(b),M.road); m.receiveShadow=true; scene.add(m);
+}
+// parks / water / construction
+const parkPolys=[];
+{
+  const pb=newBuf(), wb=newBuf(), cb=newBuf();
+  for(const p of SCENE.parks){ flat(pb,p.p,0.2); parkPolys.push(p); }
+  for(const w of SCENE.water){ if(w.p) flat(wb,w.p,0.25); else ribbon(wb,w.l,10,0.25); }
+  for(const c of SCENE.construction){ flat(cb,c.p,0.15); }
+  const pm=new THREE.Mesh(geomOf(pb),M.park); pm.receiveShadow=true; scene.add(pm);
+  const wm=new THREE.Mesh(geomOf(wb),M.water); wm.receiveShadow=true; scene.add(wm);
+  const cm=new THREE.Mesh(geomOf(cb),M.constr); cm.receiveShadow=true; scene.add(cm);
+}
+// highlighted park (公七)
+const park7=SCENE.parks.find(p=>p.n==='青埔公七公園');
+const parkHiMesh=(()=>{const b=newBuf(); if(park7) flat(b,park7.p,0.32); const m=new THREE.Mesh(geomOf(b),M.parkHi); m.receiveShadow=true; scene.add(m); return m;})();
+// airport MRT viaduct
+{
+  const b=newBuf(), pb=newBuf();
+  for(const r of SCENE.rail){
+    if(r.k!=='subway') continue;
+    const h=r.lay==='2'?16:10;
+    for(let i=0;i<r.l.length-1;i++){
+      const a=r.l[i],c=r.l[i+1]; const dx=c[0]-a[0],dy=c[1]-a[1],L=Math.hypot(dx,dy); if(L<0.5) continue;
+      const nx=-dy/L*4.5, ny=dx/L*4.5;
+      extrude(b,[[a[0]+nx,a[1]+ny],[a[0]-nx,a[1]-ny],[c[0]-nx,c[1]-ny],[c[0]+nx,c[1]+ny]],h-1.8,h,{noEdges:true,bottom:true});
+    }
+    let acc=0; for(let i=0;i<r.l.length-1;i++){const a=r.l[i],c=r.l[i+1]; const L=Math.hypot(c[0]-a[0],c[1]-a[1]); acc+=L; if(acc>34){acc=0; extrude(pb,[[a[0]-1,a[1]-1],[a[0]+1,a[1]-1],[a[0]+1,a[1]+1],[a[0]-1,a[1]+1]],0,h-1.8,{noEdges:true});}}
+  }
+  const m=new THREE.Mesh(geomOf(b),M.bldg); m.castShadow=true; m.receiveShadow=true; scene.add(m);
+  const p=new THREE.Mesh(geomOf(pb),M.bldg); p.castShadow=true; scene.add(p);
+}
+
+// trees
+const R_TREE=rng(20171225);
+const treePts=[];
+function tryTree(x,y,s){
+  if(Math.hypot(x,y)>980) return;
+  if(insideSite(x,y)) return;
+  if(inBuilding(x,y)) return;
+  for(const c of SCENE.construction){ if(c.n&&c.n.startsWith('高速鐵路')&&pip(x,y,c.p)) return; }
+  treePts.push([x,y,s]);
+}
+for(const r of roadPolys){
+  const major=['primary','secondary','tertiary','unclassified'].includes(r.k);
+  if(!major && r.k!=='residential') continue;
+  const lim=major?900:520; const sp=major?11:14; const off=r.w/2+2.2;
+  for(let i=0;i<r.p.length-1;i++){
+    const a=r.p[i],c=r.p[i+1]; const dx=c[0]-a[0],dy=c[1]-a[1],L=Math.hypot(dx,dy); if(L<1) continue;
+    const nx=-dy/L,ny=dx/L;
+    for(let s=sp/2;s<L;s+=sp){ const x=a[0]+dx*s/L,y=a[1]+dy*s/L; if(Math.hypot(x,y)>lim) continue;
+      tryTree(x+nx*off,y+ny*off,0.9+R_TREE()*0.35); tryTree(x-nx*off,y-ny*off,0.9+R_TREE()*0.35); }
+  }
+}
+for(const t of SCENE.trees){ for(let i=0;i<t.l.length-1;i++){const a=t.l[i],c=t.l[i+1],L=Math.hypot(c[0]-a[0],c[1]-a[1]); for(let s=0;s<L;s+=8) tryTree(a[0]+(c[0]-a[0])*s/L,a[1]+(c[1]-a[1])*s/L,1);} }
+for(const p of SCENE.parks){
+  if(p.k==='pitch') continue;
+  const A=polyArea(p.p); if(A<200) continue;
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; for(const q of p.p){x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1]);}
+  const n=Math.min(900,Math.round(A/(p.n==='青埔公七公園'?70:120)));
+  for(let i=0;i<n;i++){const x=x0+R_TREE()*(x1-x0),y=y0+R_TREE()*(y1-y0); if(pip(x,y,p.p)) tryTree(x,y,0.9+R_TREE()*0.6);}
+}
+// courtyard trees on site
+const courtTrees=[];
+for(let i=0;i<26;i++){const u=42+R_TREE()*56, v=38+R_TREE()*28; if(u>54&&u<92&&v>41&&v<53) continue; const p=uv(u,v); courtTrees.push([p[0],p[1],0.75+R_TREE()*0.3]);}
+for(let i=0;i<10;i++){const p=uv(16+i*9.2,12.2); if(i>=2&&i<=3) continue; courtTrees.push([p[0],p[1],0.8]);}
+{
+  const all=treePts.concat(courtTrees);
+  const crown=new THREE.IcosahedronGeometry(1,1), trunk=new THREE.CylinderGeometry(0.16,0.24,1,5);
+  const im=new THREE.InstancedMesh(crown,M.tree,all.length), it=new THREE.InstancedMesh(trunk,M.trunk,all.length);
+  const m4=new THREE.Matrix4(), q=new THREE.Quaternion(), s=new THREE.Vector3(), p=new THREE.Vector3();
+  all.forEach((t,i)=>{
+    const k=t[2]; const r=2.6*k;
+    p.set(t[0],3.4*k+r*0.75,-t[1]); s.set(r,r*1.05,r); m4.compose(p,q,s); im.setMatrixAt(i,m4);
+    p.set(t[0],1.9*k,-t[1]); s.set(1,3.8*k,1); m4.compose(p,q,s); it.setMatrixAt(i,m4);
+  });
+  im.castShadow=true; im.receiveShadow=true; it.castShadow=false;
+  scene.add(im); scene.add(it);
+}
+
+/* ---------------- project: RICH ONE ---------------- */
+const P=group('project');
+// site paving + courtyard + pool + boundary
+{
+  const b=newBuf(); flat(b,SITE_POLY,0.4); const m=new THREE.Mesh(geomOf(b),M.plaza); m.receiveShadow=true; P.add(m);
+  const cb=newBuf(); flat(cb,rectUV(39,101,35,68),0.55); flat(cb,rectUV(14,40,58,68),0.55); const cm=new THREE.Mesh(geomOf(cb),M.court); cm.receiveShadow=true; P.add(cm);
+  const pb=newBuf(); extrude(pb,rectUV(56,90,43,51),0.55,1.0,{noEdges:true}); const pm=new THREE.Mesh(geomOf(pb),M.pool); pm.receiveShadow=true; P.add(pm);
+  const bl=new THREE.LineLoop(lineGeom(SITE_POLY,0.9),M.accentLine); bl.computeLineDistances(); P.add(bl);
+  // walkway loop (水樹步道 schematic)
+  const wk=[]; for(let i=0;i<=40;i++){const a=i/40*Math.PI*2; wk.push(uv(73+Math.cos(a)*25,52+Math.sin(a)*12));}
+  const wl=new THREE.Line(lineGeom(wk,0.7),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.8})); P.add(wl); P.userData.walk=wl;
+}
+const TOWER={};
+function buildTower(key){
+  const T=TW[key], g=new THREE.Group(); P.add(g);
+  const h=towerH(T.floors);
+  // glass core (inset)
+  const cb=newBuf(); extrude(cb,rectUV(T.u[0]+0.6,T.u[1]-0.6,T.v[0]+0.6,T.v[1]-0.6),H1,h,{noEdges:true});
+  const core=new THREE.Mesh(geomOf(cb),key==='A'?M.glassA:M.glass); core.castShadow=true; core.receiveShadow=true; g.add(core);
+  // 1F retail / lobby band
+  const rb=newBuf(); extrude(rb,rectUV(T.u[0]+1.2,T.u[1]-1.2,T.v[0]+1.2,T.v[1]-1.2),0,H1,{noEdges:true});
+  const ret=new THREE.Mesh(geomOf(rb),M.glass); ret.castShadow=true; g.add(ret);
+  // floor slabs (instanced)
+  const sb=newBuf(); extrude(sb,rectUV(T.u[0]-0.5,T.u[1]+0.5,T.v[0]-0.5,T.v[1]+0.5),0,0.38,{noEdges:true,bottom:true});
+  const n=T.floors; const slabs=new THREE.InstancedMesh(geomOf(sb),M.slab,n);
+  const m4=new THREE.Matrix4(); const col=new THREE.Color(1,1,1);
+  for(let k=2;k<=n+1;k++){ m4.makeTranslation(0,(k===n+1?h:floorBase(k))-0.19,0); slabs.setMatrixAt(k-2,m4); slabs.setColorAt(k-2,col); }
+  slabs.castShadow=true; slabs.receiveShadow=true; g.add(slabs);
+  // outline
+  const eb=newBuf(); extrude(eb,rectUV(T.u[0],T.u[1],T.v[0],T.v[1]),0,h);
+  const edge=new THREE.LineSegments(edgesOf(eb),M.tEdge); g.add(edge);
+  // rooftop structures
+  const um=(T.u[0]+T.u[1])/2, vm=(T.v[0]+T.v[1])/2;
+  const ro=newBuf();
+  if(key==='A'){ extrude(ro,rectUV(um-5,um+5,vm-7,vm+7),h,h+7.5); }
+  else { extrude(ro,rectUV(um-17,um-7,vm-4,vm+4),h,h+7.5); extrude(ro,rectUV(um+7,um+17,vm-4,vm+4),h,h+7.5); }
+  const roof=new THREE.Mesh(geomOf(ro),M.roof); roof.castShadow=true; g.add(roof);
+  const re=new THREE.LineSegments(edgesOf(ro),M.tEdge); g.add(re);
+  TOWER[key]={g,core,ret,slabs,h,T,roof};
+}
+buildTower('A'); buildTower('B');
+// link canopy between towers
+{const b=newBuf(); extrude(b,rectUV(36,44,17,29),0,5.2); const m=new THREE.Mesh(geomOf(b),M.slab); m.castShadow=true; P.add(m); P.add(new THREE.LineSegments(edgesOf(b),M.tEdge));}
+
+// program colour stack + basement
+window.__stack=true;
+function recolorStack(){
+  for(const k of ['A','B']){
+    const t=TOWER[k]; if(!t) continue; const n=t.T.floors;
+    for(let i=0;i<n;i++){ t.slabs.setColorAt(i, stackMode? (i===n-1?COL.roof:COL.res) : COL.slab); }
+    t.slabs.instanceColor.needsUpdate=true;
+  }
+}
+let stackMode=false;
+const BASE=group('basement');
+{
+  for(let i=0;i<3;i++){
+    const b=newBuf(); extrude(b,rectUV(14,101,12,68),-(i+1)*3.4+0.3,-i*3.4-0.3,{bottom:true});
+    const m=new THREE.Mesh(geomOf(b),M.base); m.renderOrder=10; BASE.add(m);
+    const e=new THREE.LineSegments(edgesOf(b),M.baseEdge); e.renderOrder=11; BASE.add(e);
+  }
+  BASE.visible=false;
+}
+
+// transaction floor bands
+window.__tx=true;
+const TXB=group('tx');
+const txMesh={};
+{
+  for(const k of ['A','B']){
+    const T=TW[k]; const b=newBuf(); extrude(b,rectUV(T.u[0]-0.9,T.u[1]+0.9,T.v[0]-0.9,T.v[1]+0.9),0,1,{noEdges:true,bottom:true});
+    const list=TX.filter(r=>txTower(r[1])===k);
+    const im=new THREE.InstancedMesh(geomOf(b),new THREE.MeshLambertMaterial({transparent:true,opacity:.92}),Math.max(1,list.length));
+    const m4=new THREE.Matrix4(), s=new THREE.Vector3(1,3.0,1), p=new THREE.Vector3(), q=new THREE.Quaternion();
+    list.forEach((r,i)=>{p.set(0,floorBase(r[2])+0.15,0); m4.compose(p,q,s); im.setMatrixAt(i,m4);});
+    im.count=list.length; im.userData.list=list; TXB.add(im); txMesh[k]=im;
+  }
+  TXB.visible=false;
+}
+function priceColor(v,special){
+  const t=Math.max(0,Math.min(1,(v-40)/35));
+  const c=COL.accentSoft.clone().lerp(COL.accent,t);
+  if(special) c.lerp(COL.ink3,.6);
+  return c;
+}
+function recolorTx(){ for(const k of ['A','B']){const im=txMesh[k]; if(!im) continue; im.userData.list.forEach((r,i)=>im.setColorAt(i,priceColor(r[5],r[6]))); if(im.instanceColor) im.instanceColor.needsUpdate=true;} }
+
+// rings
+const RINGS=group('rings');
+for(const r of [200,400,800]){
+  const pts=[]; for(let i=0;i<=128;i++){const a=i/128*Math.PI*2; pts.push([CENTER[0]+Math.cos(a)*r,CENTER[1]+Math.sin(a)*r]);}
+  const l=new THREE.Line(lineGeom(pts,1.2),M.ringLine); l.computeLineDistances(); RINGS.add(l);
+}
+RINGS.visible=false;
+
+// walking route
+const ROUTE=group('route');
+const routeLine=SCENE.walk.l;
+let routeCum=[0];
+{
+  const b=newBuf(); ribbon(b,routeLine,4.5,1.1); ROUTE.add(new THREE.Mesh(geomOf(b),M.route));
+  for(let i=1;i<routeLine.length;i++) routeCum.push(routeCum[i-1]+Math.hypot(routeLine[i][0]-routeLine[i-1][0],routeLine[i][1]-routeLine[i-1][1]));
+  const dots=new THREE.InstancedMesh(new THREE.SphereGeometry(3.2,10,8),M.routeDot,14); ROUTE.add(dots); ROUTE.userData.dots=dots;
+}
+ROUTE.visible=false;
+function routeAt(d){
+  const L=routeCum[routeCum.length-1]; d=((d%L)+L)%L; let i=1; while(i<routeCum.length-1&&routeCum[i]<d) i++;
+  const a=routeLine[i-1],b=routeLine[i],t=(d-routeCum[i-1])/Math.max(1e-6,routeCum[i]-routeCum[i-1]);
+  return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+}
+
+// development parcel (國泰) + ghost massing
+const FUT=group('future');
+const parcel=SCENE.construction.find(c=>c.n&&c.n.startsWith('高速鐵路'));
+const PAR={};
+{
+  const b=newBuf(); flat(b,parcel.p,0.6); const pm=new THREE.Mesh(geomOf(b),M.parcel); FUT.add(pm); PAR.fill=pm;
+  const ol=new THREE.LineLoop(lineGeom(parcel.p,1.4),M.accentLine); ol.computeLineDistances(); FUT.add(ol); PAR.line=ol;
+  const P0=[-160.75,110.9], A=[-0.7485,0.6632], B=[0.665,0.7465];
+  const pf=(a,b2)=>[P0[0]+a*A[0]+b2*B[0], P0[1]+a*A[1]+b2*B[1]];
+  const rect=(ac,bc,wa,wb)=>[pf(ac-wa/2,bc-wb/2),pf(ac+wa/2,bc-wb/2),pf(ac+wa/2,bc+wb/2),pf(ac-wa/2,bc+wb/2)];
+  const gb=newBuf();
+  extrude(gb,rect(220,95,320,110),0,24,{bottom:false});
+  [[90,95,42,36,150],[170,68,34,34,112],[250,122,34,34,124],[330,80,34,34,96],[396,140,32,32,82]].forEach(t=>extrude(gb,rect(t[0],t[1],t[2],t[3]),24,t[4]));
+  const gm=new THREE.Mesh(geomOf(gb),M.ghost); gm.renderOrder=5; const ge=new THREE.LineSegments(edgesOf(gb),M.ghostEdge);
+  const gg=new THREE.Group(); gg.add(gm); gg.add(ge); FUT.add(gg); PAR.ghost=gg;
+  PAR.top=pf(90,95); PAR.mid=pf(220,95);
+}
+FUT.visible=false;
+
+// timeline marker
+const MARK=group('marker');
+{
+  const r=new THREE.Mesh(new THREE.RingGeometry(16,22,48),M.marker); r.rotation.x=-Math.PI/2; MARK.add(r);
+  const r2=new THREE.Mesh(new THREE.RingGeometry(30,32,48),M.marker); r2.rotation.x=-Math.PI/2; MARK.add(r2); MARK.userData.r2=r2;
+  MARK.visible=false;
+}
+
+// sun dome
+const SUN=group('sun');
+const SUN_R=250;
+{
+  const ring=[]; for(let i=0;i<=96;i++){const a=i/96*Math.PI*2; ring.push([CENTER[0]+Math.cos(a)*SUN_R,CENTER[1]+Math.sin(a)*SUN_R]);}
+  SUN.add(new THREE.Line(lineGeom(ring,1.3),M.compassLine));
+  const ticks=[]; for(let d=0;d<360;d+=15){const a=d*DEG, r0=SUN_R-(d%90===0?16:7); ticks.push(CENTER[0]+Math.sin(a)*r0,1.3,-(CENTER[1]+Math.cos(a)*r0),CENTER[0]+Math.sin(a)*SUN_R,1.3,-(CENTER[1]+Math.cos(a)*SUN_R));}
+  const tg=new THREE.BufferGeometry(); tg.setAttribute('position',new THREE.Float32BufferAttribute(ticks,3)); SUN.add(new THREE.LineSegments(tg,M.compassLine));
+  const arc=new THREE.Mesh(new THREE.BufferGeometry(),M.sunBall); SUN.add(arc); SUN.userData.arc=arc;
+  const ball=new THREE.Mesh(new THREE.SphereGeometry(13,24,16),M.sunBall); SUN.add(ball); SUN.userData.ball=ball;
+  const ray=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineDashedMaterial({color:0xD99A1E,dashSize:5,gapSize:4})); SUN.add(ray); SUN.userData.ray=ray;
+  SUN.visible=false;
+}
+
+/* ============================================================
+   SOLAR POSITION (NOAA)
+   ============================================================ */
+function sunPos(doy,hour){
+  const g=2*Math.PI/365*(doy-1+(hour-12)/24);
+  const decl=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
+  const eqt=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g));
+  const tst=hour*60+eqt+4*LON-480; const ha=(tst/4-180)*DEG, la=LAT*DEG;
+  const cz=Math.sin(la)*Math.sin(decl)+Math.cos(la)*Math.cos(decl)*Math.cos(ha);
+  const zen=Math.acos(Math.max(-1,Math.min(1,cz)));
+  let az=Math.atan2(Math.sin(ha),Math.cos(ha)*Math.sin(la)-Math.tan(decl)*Math.cos(la))/DEG+180;
+  return {alt:90-zen/DEG, az:(az+360)%360};
+}
+function sunDir(s){const a=s.alt*DEG,z=s.az*DEG; return new THREE.Vector3(Math.cos(a)*Math.sin(z),Math.sin(a),-Math.cos(a)*Math.cos(z));}
+function riseSet(doy){let r=null,s=null; for(let m=240;m<=1260;m++){const p=sunPos(doy,m/60); if(p.alt>-0.83){ if(r===null) r=m; s=m; }} return [r/60,s/60];}
+const FACADES=[{k:'B 棟東南面',n:132.3},{k:'A 棟西南面',n:222.3},{k:'B 棟西北面',n:312.3},{k:'A 棟東北面',n:42.3}];
+function facadeHours(doy){return FACADES.map(f=>{let c=0; for(let m=240;m<=1260;m+=5){const p=sunPos(doy,m/60); if(p.alt>2&&Math.cos((p.az-f.n)*DEG)>0) c+=5;} return c/60;});}
+const sunState={doy:110,hour:10.5};
+function setSun(doy,hour,showDome){
+  sunState.doy=doy; sunState.hour=hour;
+  const s=sunPos(doy,hour); const d=sunDir(s);
+  const tgt=W3(CENTER[0],CENTER[1],0);
+  sunL.target.position.copy(tgt);
+  sunL.position.copy(tgt).addScaledVector(d,1200);
+  const up=Math.max(0,Math.min(1,s.alt/6));
+  sunL.intensity=baseDirI*up;
+  hemi.intensity=hemiBase*(0.55+0.45*Math.max(0,Math.min(1,(s.alt+6)/12)));
+  if(showDome){
+    const pts=[]; const [r0,r1]=riseSet(doy);
+    for(let m=Math.floor(r0*60);m<=Math.ceil(r1*60);m+=6){const p=sunPos(doy,m/60); if(p.alt<-0.5) continue; const v=sunDir(p).multiplyScalar(SUN_R).add(tgt); pts.push(v.x,v.y,v.z);}
+    const vv=[]; for(let i=0;i<pts.length;i+=3) vv.push(new THREE.Vector3(pts[i],pts[i+1],pts[i+2]));
+    SUN.userData.arc.geometry.dispose();
+    SUN.userData.arc.geometry=vv.length>1?new THREE.TubeGeometry(new THREE.CatmullRomCurve3(vv),Math.max(8,vv.length),1.6,6,false):new THREE.BufferGeometry();
+    const bp=sunDir(s).multiplyScalar(SUN_R).add(tgt); SUN.userData.ball.position.copy(bp); SUN.userData.ball.visible=s.alt>-0.5;
+    const top=W3(uv(27.5,36)[0],uv(27.5,36)[1],towerH(22));
+    const rg=new THREE.BufferGeometry().setFromPoints([bp,top]); SUN.userData.ray.geometry.dispose(); SUN.userData.ray.geometry=rg; SUN.userData.ray.computeLineDistances(); SUN.userData.ray.visible=s.alt>0;
+    SUN.userData.ray.material.color.copy(COL.sun);
+  }
+  return s;
+}
+
+/* ============================================================
+   WIND FIELD (particles deflected around the two towers)
+   ============================================================ */
+let wind=null;
+{
+  const N=(innerWidth<900)?380:760; const R=340;
+  const pg=new THREE.PlaneGeometry(1,1); pg.rotateX(-Math.PI/2);
+  const streaks=new THREE.InstancedMesh(pg,new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}),N);
+  streaks.frustumCulled=false; const sm4=new THREE.Matrix4(), sq=new THREE.Quaternion(), ss=new THREE.Vector3(), sp=new THREE.Vector3(), yAx=new THREE.Vector3(0,1,0), tmpC=new THREE.Color();
+  for(let i=0;i<N;i++) streaks.setColorAt(i,new THREE.Color(1,1,1));
+  const WG=group('wind'); WG.add(streaks); WG.visible=false;
+  const P2=[]; const rnd=rng(42);
+  let dirFrom=45;
+  function flow(){const b=(dirFrom+180)*DEG; return [Math.sin(b),Math.cos(b)];}
+  function spawn(p,anywhere){
+    const f=flow(); const px=-f[1],py=f[0];
+    if(anywhere){const a=rnd()*Math.PI*2,r=Math.sqrt(rnd())*R; p.x=CENTER[0]+Math.cos(a)*r; p.y=CENTER[1]+Math.sin(a)*r;}
+    else{const s=(rnd()*2-1)*R; p.x=CENTER[0]-f[0]*R*0.98+px*s; p.y=CENTER[1]-f[1]*R*0.98+py*s;}
+    p.h=8+rnd()*46; p.age=0; p.life=5+rnd()*6; p.vx=f[0]; p.vy=f[1];
+  }
+  for(let i=0;i<N;i++){const p={}; spawn(p,true); p.age=rnd()*p.life; P2.push(p);}
+  const rects=[TW.A,TW.B];
+  function step(dt,speed){
+    const f=flow(); const base=speed*26;
+    const bg=COL.bg, wc=COL.wind;
+    for(let i=0;i<N;i++){
+      const p=P2[i];
+      let vx=f[0], vy=f[1];
+      // deflect in site frame
+      const q=toUV(p.x,p.y); let boost=1;
+      for(const T of rects){
+        const m=16; if(q[0]<T.u[0]-m||q[0]>T.u[1]+m||q[1]<T.v[0]-m||q[1]>T.v[1]+m) continue;
+        if(p.h>towerH(T.floors)) continue;
+        const cu=Math.max(T.u[0],Math.min(T.u[1],q[0])), cv=Math.max(T.v[0],Math.min(T.v[1],q[1]));
+        let du=q[0]-cu, dv=q[1]-cv; const d=Math.hypot(du,dv);
+        if(d<0.3){ spawn(p,false); break; }
+        du/=d; dv/=d; const k=Math.max(0,(m-d)/m);
+        // outward push, converted from uv to xy
+        vx+=(du*UU[0]+dv*VV[0])*k*1.7; vy+=(du*UU[1]+dv*VV[1])*k*1.7; boost=Math.max(boost,1+k*0.9);
+      }
+      const L=Math.hypot(vx,vy)||1; vx=vx/L*base*boost; vy=vy/L*base*boost;
+      p.vx=vx; p.vy=vy;
+      p.x+=vx*dt; p.y+=vy*dt; p.age+=dt;
+      const dc=Math.hypot(p.x-CENTER[0],p.y-CENTER[1]);
+      if(p.age>p.life||dc>R*1.02) spawn(p,false);
+      const sp2=Math.hypot(vx,vy), len=Math.max(6,sp2*0.85);
+      const fade=Math.min(1,p.age/0.8,(p.life-p.age)/0.8)*Math.max(0,1-Math.max(0,dc-R*0.6)/(R*0.4));
+      const hot=Math.min(1,(boost-1)/0.9);
+      sp.set(p.x-vx*0.375,p.h,-(p.y-vy*0.375)); sq.setFromAxisAngle(yAx,Math.atan2(vy,vx)); ss.set(len,1,2.2);
+      sm4.compose(sp,sq,ss); streaks.setMatrixAt(i,sm4);
+      tmpC.copy(wc).lerp(COL.accent,hot); tmpC.lerp(bg,1-fade); streaks.setColorAt(i,tmpC);
+    }
+    streaks.instanceMatrix.needsUpdate=true; if(streaks.instanceColor) streaks.instanceColor.needsUpdate=true;
+  }
+  wind={group:WG,step,setDir:d=>{dirFrom=d;},recolor:()=>{},speed:1};
+}
+
+/* ============================================================
+   LABELS
+   ============================================================ */
+const labelsEl=document.getElementById('labels');
+const LABELS=[];
+function label(id,xy,h,html,cls,stem){
+  const el=document.createElement('div'); el.className='lbl '+(cls||''); el.style.display='none';
+  if(stem) el.style.setProperty('--stem',stem+'px');
+  el.innerHTML='<span class="stem"></span><span class="tx">'+html+'</span>';
+  labelsEl.appendChild(el);
+  const L={id,el,pos:W3(xy[0],xy[1],h),on:false,shown:false}; LABELS.push(L); return L;
+}
+const LB={};
+const tA=uv(27.5,36), tB=uv(70,24);
+LB.site=label('site',uv(56,28),78,'禾林 RICH ONE','box',34);
+LB.A=label('A',tA,towerH(22)+8,'A 棟　22F<small>青商路276–286號</small>','',30);
+LB.B=label('B',tB,towerH(21)+8,'B 棟　21F<small>青商路256–272號</small>','',46);
+LB.A2=label('A2',tA,towerH(22)+8,'A 棟　約 74 m<small>22F・推估</small>','',30);
+LB.B2=label('B2',tB,towerH(21)+8,'B 棟　約 71 m<small>21F・推估</small>','',46);
+LB.qs=label('qs',uv(78,-3),0,'青 商 路','tag road');
+LB.hs=label('hs',uv(-4,50),0,'高 鐵 站 前 西 路 二 段','tag road');
+LB.q2=label('q2',[115,4],0,'青 埔 二 街','tag road');
+LB.ln=label('ln',[-39,194],0,'領 航 南 路','tag road');
+LB.retail=label('retail',uv(64,15),3,'1F 店面<small>沿青商路</small>','',36);
+LB.court=label('court',uv(72,58),1,'中庭<small>東南側開放空間</small>','',30);
+LB.pool=label('pool',uv(73,47),1,'天光泳池<small>位置示意</small>','acc',40);
+LB.walk=label('walk',uv(96,60),1,'水樹步道<small>位置示意</small>','',26);
+for(const [k,p] of Object.entries(PLACES)) LB[k]=label(k,p.xy,k==='park'||k==='pond'||k==='field'?2:28,p.name+(p.sub?'<small>'+p.sub+'</small>':''),'',k==='park'?30:26);
+LB.parkBig=label('parkBig',PLACES.park.xy,2,'青埔公七公園<small>1.23 ha・隔青商路</small>','',40);
+LB.r200=label('r200',[CENTER[0],CENTER[1]+200],0,'200 m','tag ring');
+LB.r400=label('r400',[CENTER[0],CENTER[1]+400],0,'400 m','tag ring');
+LB.r800=label('r800',[CENTER[0],CENTER[1]+800],0,'800 m','tag ring');
+LB.roof=label('roof',uv(70,24),towerH(21)+6,'屋突<small>機電設施</small>','',24);
+LB.res=label('res',uv(97,24),40,'住宅<small>2F 以上</small>','',22);
+LB.ret2=label('ret2',uv(97,24),2.5,'1F<small>店面・大廳</small>','',22);
+LB.bsm=label('bsm',uv(101,68),-6,'B1–B3 停車<small>307 位</small>','',22);
+LB.fSE=label('fSE',uv(70,32),38,'東南面 132°','tag cmp');
+LB.fSW=label('fSW',uv(19,36),38,'西南面 222°','tag cmp');
+LB.fNW=label('fNW',uv(70,16),38,'西北面 312°','tag cmp');
+LB.fNE=label('fNE',uv(36,46),38,'東北面 42°','tag cmp');
+for(const [k,d] of [['N',0],['E',90],['S',180],['W',270]]){const a=d*DEG; LB['c'+k]=label('c'+k,[CENTER[0]+Math.sin(a)*(SUN_R+18),CENTER[1]+Math.cos(a)*(SUN_R+18)],1,k,'tag cmp');}
+LB.wNE=label('wNE',[CENTER[0]+230,CENTER[1]+230],40,'東北季風<small>NE・23.5%</small>','wind',30);
+LB.wSW=label('wSW',[CENTER[0]-250,CENTER[1]-100],40,'西南偏西風<small>WSW・夏季</small>','wind',30);
+LB.wCorner=label('wCorner',uv(36,57),20,'角隅加速<small>A 棟東南角</small>','wind',34);
+LB.wFace=label('wFace',uv(37,30),55,'迎風立面<small>A 棟東北面</small>','wind',30);
+LB.wStreet=label('wStreet',uv(140,-4),2,'青商路導風','wind',30);
+LB.route=label('route',routeAt(560),2,'步行 1,082 m<small>約 14 分鐘</small>','acc',34);
+LB.hsr2=label('hsr2',PLACES.hsr.xy,24,'高鐵桃園站・機捷 A18<small>直線 862 m</small>','box',32);
+LB.par=label('par',PAR.mid,30,'站前特定區事業發展用地<small>約 10.6 ha（OSM 量測）</small>','',40);
+LB.ghost=label('ghost',PAR.top,152,'5 棟複合大樓<small>量體示意・非設計方案</small>','acc',30);
+LB.vPark=label('vPark',PLACES.park.xy,4,'公七公園<small>131 m</small>','',30);
+LB.vPar=label('vPar',PLACES.cathay.xy,30,'站前開發用地<small>471 m</small>','',30);
+LB.vHsr=label('vHsr',PLACES.hsr.xy,24,'高鐵桃園站<small>862 m</small>','',30);
+LB.mark=label('mark',[0,0],30,'','acc',30);
+
+/* ============================================================
+   CAMERA RIG
+   ============================================================ */
+const rig={t:new THREE.Vector3(),d:600,az:200,el:35};
+const from={}, to={}; let tw=null;
+let fovGoal=30;
+function setCam(c,instant){
+  fovGoal=c.fov||30; if(instant){camera.fov=fovGoal; camera.updateProjectionMatrix();}
+  const t=W3(c.t[0],c.t[1],c.t[2]||0);
+  const dd=(NARROW()&&!c.fov)?c.d*1.35:c.d;
+  to.t=t; to.d=dd; to.az=c.az; to.el=c.el;
+  if(instant||matchMedia('(prefers-reduced-motion: reduce)').matches){ rig.t.copy(t); rig.d=dd; rig.az=c.az; rig.el=c.el; tw=null; return; }
+  from.t=rig.t.clone(); from.d=rig.d; from.az=rig.az; from.el=rig.el;
+  let daz=((to.az-from.az)%360+540)%360-180; to.az=from.az+daz;
+  tw={t0:performance.now(),dur:c.dur||1700};
+}
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+function updateRig(now){
+  if(tw){
+    let k=(now-tw.t0)/tw.dur; if(k>=1){k=1;}
+    const e=ease(k);
+    rig.t.lerpVectors(from.t,to.t,e);
+    // fly-over arc for long moves: rise mid-way
+    const far=from.t.distanceTo(to.t);
+    const lift=far>300?Math.sin(e*Math.PI)*Math.min(.35,far/4000):0;
+    rig.d=(from.d+(to.d-from.d)*e)*(1+lift);
+    rig.az=from.az+(to.az-from.az)*e; rig.el=from.el+(to.el-from.el)*e;
+    if(k>=1) tw=null;
+  }
+  const el=rig.el*DEG, az=rig.az*DEG, h=rig.d*Math.cos(el);
+  camera.position.set(rig.t.x+Math.sin(az)*h, rig.t.y+rig.d*Math.sin(el), rig.t.z-Math.cos(az)*h);
+  camera.lookAt(rig.t);
+  if(Math.abs(camera.fov-fovGoal)>0.05){camera.fov+=(fovGoal-camera.fov)*0.08; camera.updateProjectionMatrix();}
+  const near=Math.max(1.5,rig.d*0.025); if(Math.abs(camera.near-near)>0.5){camera.near=near; camera.updateProjectionMatrix();}
+  scene.fog.near=rig.d*1.05; scene.fog.far=rig.d*2.6+600;
+}
+// pointer controls
+let drag=null; const pts=new Map(); let pinch0=0;
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId); pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); drag={b:e.button,shift:e.shiftKey}; canvas.classList.add('drag'); userTouched();
+  if(pts.size===2){const [a,b]=[...pts.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y);} });
+canvas.addEventListener('pointermove',e=>{
+  if(!pts.has(e.pointerId)) return;
+  const prev=pts.get(e.pointerId); pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); tw=null;
+  if(pts.size>=2){
+    const [a,b]=[...pts.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(pinch0>0&&d>0) rig.d=Math.max(40,Math.min(4200,rig.d*pinch0/d)); pinch0=d; return;
+  }
+  const dx=e.clientX-prev.x, dy=e.clientY-prev.y;
+  if(drag&&(drag.b===2||drag.shift)){ // pan along the ground
+    const s=rig.d*0.0016, az=rig.az*DEG;
+    rig.t.x-=dx*Math.cos(az)*s; rig.t.z-=dx*Math.sin(az)*s;
+    rig.t.x-=dy*Math.sin(az)*s*1.2; rig.t.z+=dy*Math.cos(az)*s*1.2;
+  }else{
+    rig.az-=dx*0.28; rig.el=Math.max(2,Math.min(88,rig.el+dy*0.22));
+  }
+});
+const endP=e=>{pts.delete(e.pointerId); pinch0=0; if(!pts.size){drag=null; canvas.classList.remove('drag');}};
+canvas.addEventListener('pointerup',endP); canvas.addEventListener('pointercancel',endP);
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+canvas.addEventListener('wheel',e=>{e.preventDefault(); tw=null; rig.d=Math.max(40,Math.min(4200,rig.d*Math.exp(e.deltaY*0.0012))); userTouched();},{passive:false});
+
+/* ============================================================
+   CHAPTERS
+   ============================================================ */
+const resv=s=>s.replace(/var\(--([A-Za-z0-9]+)\)/g,(m,n)=>tok('--'+n)||m);
+const stats=a=>'<div class="stats">'+a.map(s=>`<div class="stat"><b>${s[0]}${s[1]?'<i>'+s[1]+'</i>':''}</b><span>${s[2]}</span></div>`).join('')+'</div>';
+const eyeB=uv(80,13.5);
+function viewCam(f){
+  const y=floorBase(f)+1.6; const b=318*DEG; const D=640;
+  const tx=eyeB[0]+Math.sin(b)*D, ty=eyeB[1]+Math.cos(b)*D, th=y-D*Math.tan(9*DEG);
+  const el=Math.atan2(y-th,D)/DEG;
+  return {t:[tx,ty,th],d:Math.hypot(D,y-th),az:138,el:el,fov:52};
+}
+const DEF_SUN={doy:110,hour:10.5};
+let tlIndex=0, viewFloor=15, windMode='ALL', sunPlay=false, shadowAuto=true, autoTimer=null;
+
+const CH=[
+ {key:'cover',nav:'封面',
+  kicker:'桃園市中壢區｜青商路 × 高鐵站前西路二段口',
+  title:'禾林<br><em>RICH ONE</em>', sub:'青埔高鐵站前・L 型雙塔住宅',
+  body:'<p>禾林開發｜建築設計 林永發建築師｜營造 復興營造。</p><p>基地環境分析：區位、量體、產品、景觀、日照、陰影、風場、視野、天際線、交通、行情與站前開發。</p>',
+  stats:[['22','F','地上樓層（地下 3 層）'],['208','戶','住宅＋店面'],['2017','','建築完成（12/25）']],
+  extra:()=>'<p class="hint">按 → 或空白鍵開始，F 全螢幕；三維畫面可拖曳旋轉、滾輪縮放、右鍵平移。</p>',
+  foot:'本頁為依公開資料整理的獨立分析，並非禾林官方文件。本案量體依 OpenStreetMap 建物輪廓、衛星影像與公開資料示意；周邊建物高度依類型推估。資料整理：2026-11。',
+  cam:{t:[CENTER[0]-30,CENTER[1]+30,30],d:640,az:208,el:30},
+  labels:['site','qs','hs','parkBig'], layers:{}},
+
+ {key:'timeline',nav:'時程',
+  title:'高鐵通車十年，<br>雙塔落成',
+  body:'<p>2007 年高鐵桃園站通車，2017 年底本案完工。青埔從重劃區長成站前生活圈；下一個十年的重心，是西北側的站前開發。</p>',
+  extra:()=>'<div class="tl" id="tl">'+TIMELINE.map((t,i)=>`<button class="tl-item" data-i="${i}"><span><span class="y">${t.y}</span><span class="t">${t.t}</span></span></button>`).join('')+'</div>',
+  side:()=>'<div class="card" id="tlCard"></div>',
+  foot:'資料：591 實價登錄（2026-11 更新）、禾林建築官網、經濟日報 2025-09-30、天下雜誌、Bella。',
+  cam:{t:[-260,330,0],d:2000,az:200,el:52},
+  labels:['mark'], layers:{future:'parcel',marker:true},
+  mount:()=>{ document.querySelectorAll('.tl-item').forEach(b=>b.addEventListener('click',()=>{tlGo(+b.dataset.i); userTouched();})); tlGo(tlIndex,true); }},
+
+ {key:'location',nav:'區位',
+  title:'公園第一排，<br>車站一公里',
+  body:'<p>基地在青商路與高鐵站前西路二段口的東側。隔著青商路就是<b>青埔公七公園</b>；往西北約 860 公尺是<b>高鐵桃園站</b>，與機場捷運 A18 共站。</p>',
+  extra:()=>`<div class="legend">
+    <div><span class="sw" style="background:var(--glass)"></span>本案（禾林 RICH ONE）</div>
+    <div><span class="sw" style="background:var(--park2)"></span>青埔公七公園<small>1.23 ha</small></div>
+    <div><span class="sw" style="background:var(--accent);opacity:.5"></span>站前特定區事業發展用地<small>國泰開發</small></div>
+    <div><span class="sw" style="background:var(--constr)"></span>其他施工中基地<small>OSM 標示</small></div>
+    <div><span class="sw dash" style="border-color:var(--ink3)"></span>距離圈 200／400／800 m</div></div>`,
+  stats:[['131','m','公七公園（中心距）'],['862','m','高鐵桃園站（直線）'],['190','m','站前開發用地（最近處）']],
+  foot:'距離以 OpenStreetMap 圖資量測，基準點為 Google 地圖上的本案座標（25.00786, 121.21979）。',
+  cam:{t:[-230,260,0],d:2350,az:180,el:60},
+  labels:['site','hsr','gloria','ikea','park','cathay','field','pond','r200','r400','r800','qs','ln'], layers:{rings:true,future:'parcel',parkHi:true}},
+
+ {key:'massing',nav:'量體',
+  title:'L 型雙塔，<br>22F 與 21F',
+  body:'<p><b>A 棟 22 層</b>沿高鐵站前西路二段配置，<b>B 棟 21 層</b>沿青商路展開，同樣地下 3 層。兩棟在路口轉角形成 L 型，把中庭留在東南側。</p>',
+  stats:[['1,647','坪','基地面積（約 5,445 ㎡）'],['≈74','m','A 棟推估高度'],['35','%','公設比']],
+  extra:()=>'<div class="chips"><span class="chip">RC 構造</span><span class="chip">A 棟 青商路276–286號</span><span class="chip">B 棟 青商路256–272號</span><span class="chip">住宅＋店面</span></div>',
+  foot:'高度以 1F 4.5 m、標準層 3.3 m 推算；配置依 OSM 建物輪廓與衛星影像示意，並非竣工圖。資料：禾林建築官網、591 實價登錄、青埔建案資訊站（2018）。',
+  cam:{t:[CENTER[0]-4,CENTER[1]+6,26],d:380,az:338,el:26},
+  labels:['A','B','qs','hs','retail','court'], layers:{}},
+
+ {key:'program',nav:'產品',
+  title:'208 戶，<br>2 到 4 房',
+  body:'<p>坪數規劃為 28、45、63 坪，涵蓋 2、3、4 房。一樓沿青商路設店面，地下三層為停車空間，共 <b>307 個坡道平面車位</b>，平均每戶約 1.5 個。</p>',
+  extra:()=>`<div class="legend">
+    <div><span class="sw" style="background:var(--roof)"></span>屋突<small>機電設施</small></div>
+    <div><span class="sw" style="background:var(--res)"></span>住宅<small>2F–22F</small></div>
+    <div><span class="sw" style="background:var(--retail)"></span>店面・大廳<small>1F</small></div>
+    <div><span class="sw" style="background:var(--base)"></span>停車<small>B1–B3・307 位</small></div></div>
+    <div class="chips"><span class="chip acc">水樹步道</span><span class="chip acc">愛閱書閣</span><span class="chip acc">天光泳池</span><span class="chip">健身房</span><span class="chip">視聽室</span></div>`,
+  stats:[['208','戶','總戶數'],['307','位','汽車停車位'],['28–63','坪','坪數規劃']],
+  foot:'戶數、車位、構造：青埔建案資訊站（2018）；坪數與主題公設：禾林建築官網；健身房、視聽室見住戶評論。各層用途為示意。',
+  cam:{t:[CENTER[0],CENTER[1],20],d:330,az:352,el:12},
+  labels:['roof','res','ret2','bsm'], layers:{stack:true,basement:true}},
+
+ {key:'landscape',nav:'景觀',
+  title:'借景公園，<br>以光為題',
+  body:'<p>禾林以「光」作為本案的建築主軸，強調光線、通風與景觀的延伸。<b>公七公園</b>約 1.23 公頃，隔著青商路與 B 棟東北段相對；社區內規劃水樹步道、愛閱書閣與無邊際天光泳池。</p>',
+  stats:[['1.23','ha','青埔公七公園'],['≈21','m','B 棟立面至公園邊界'],['3','項','官網主題公設']],
+  foot:'公園面積與距離依 OpenStreetMap 量測；設計理念與公設名稱：禾林建築官網。泳池與步道位置為示意。',
+  cam:{t:[30,40,0],d:520,az:140,el:46},
+  labels:['parkBig','pool','walk','qs'], layers:{parkHi:true}},
+
+ {key:'sun',nav:'日照',
+  title:'東南面最亮，<br>冬天照足 7.8 小時',
+  body:'<p>B 棟長向立面朝<b>東南（132°）</b>，A 棟長向朝<b>西南（222°）</b>。冬至日 B 棟東南面約可照 7.8 小時，A 棟西南面約 8.2 小時；臨公園的 B 棟西北面，冬季只有傍晚約 2.4 小時直射，夏季增加到 6.5 小時。</p>',
+  extra:()=>`<ul class="blist">
+    <li><span><b>東南立面</b>：上午直射，冬季日照最長，適合起居空間。</span></li>
+    <li><span><b>西南立面</b>：午後西曬，夏季需要外遮陽。</span></li>
+    <li><span><b>西北立面</b>：夏季傍晚低角度西曬，冬季背光。</span></li></ul>`,
+  side:()=>`<div class="card">
+    <div class="seg" role="group" aria-label="日期"><button data-doy="172">夏至</button><button data-doy="80">春秋分</button><button data-doy="355">冬至</button></div>
+    <div class="readout"><div><b id="sT">--</b><span>時間</span></div><div><b id="sAl">--</b><span>太陽高度角</span></div><div><b id="sAz">--</b><span>方位角</span></div><div><b id="sSh">--</b><span>A 棟影長</span></div></div>
+    <div class="slider-row"><button class="btn" id="sPlay" aria-label="播放一天的日照">▶</button><input type="range" id="sRange" min="5" max="19" step="0.05" aria-label="時間"></div>
+    <div class="meta" id="sRise"></div>
+    <h3>立面直射時數（未計鄰棟遮擋）</h3><div class="bars" id="sBars"></div></div>`,
+  foot:'太陽位置以 NOAA 演算法計算（北緯 25.008°、東經 121.220°，UTC+8）；陰影為即時模擬。',
+  cam:{t:[CENTER[0],CENTER[1],30],d:860,az:196,el:52},
+  labels:['cN','cE','cS','cW','A'], layers:{sunDome:true},
+  mount:()=>mountSun()},
+
+ {key:'shadow',nav:'陰影',
+  title:'冬至上午，<br>影子越過青商路',
+  body:'<p>冬至上午 9 點太陽高度只有 26°，74 m 高的 A 棟影長約 <b>150 m</b>，往西北越過青商路；中午影子轉向正北，長約 84 m，落在對街與公七公園西南角。</p><p>夏至正午太陽幾乎在頭頂，影長只剩 2 m。</p>',
+  stats:[['152','m','冬至 09:00 影長'],['84','m','冬至 12:00 影長'],['2','m','夏至 12:00 影長']],
+  side:()=>`<div class="card"><h3>冬至・12 月 21 日</h3>
+    <div class="readout"><div><b id="hT">--</b><span>時間</span></div><div><b id="hSh">--</b><span>A 棟影長</span></div></div>
+    <div class="slider-row"><button class="btn" id="hPlay" aria-label="暫停或播放陰影動畫" aria-pressed="true">❚❚</button><input type="range" id="hRange" min="7" max="16.8" step="0.05" aria-label="時間"></div>
+    <p>影長以 A 棟屋頂推估高度 73.8 m 計算；陰影方向與太陽方位相差 180°。</p></div>`,
+  foot:'陰影為即時模擬，周邊建物高度為推估值。',
+  cam:{t:[-10,70,0],d:640,az:198,el:56},
+  labels:['parkBig','qs','A'], layers:{parkHi:true},
+  mount:()=>mountShadow()},
+
+ {key:'wind',nav:'風場',
+  title:'東北季風，<br>順著青商路吹',
+  body:'<p>桃園機場十年逐時觀測中，<b>東北風占 23.5%</b>，是全年最常見的風向；9 月到隔年 5 月都以東北風為主，6–8 月轉為西南偏西風。</p><p>青商路走向約 42°，與東北季風幾乎平行，形成導風廊道；A 棟東北面正對季風，東南角容易出現加速流。</p>',
+  side:()=>`<div class="card">
+    <div class="seg" role="group" aria-label="季節"><button data-w="ALL">全年</button><button data-w="DJF">冬</button><button data-w="MAM">春</button><button data-w="JJA">夏</button><button data-w="SON">秋</button></div>
+    <svg id="rose" viewBox="-120 -120 240 240" role="img" aria-label="風花圖"></svg>
+    <div class="readout"><div><b id="wDir">--</b><span>主導風向・頻率</span></div><div><b id="wMean">--</b><span>平均風速</span></div></div>
+    <h3>各月主導風向</h3><div class="months" id="wMonths"></div><div class="mlab"><span>1 月</span><span>12 月</span></div></div>`,
+  foot:'資料：Iowa Environmental Mesonet，RCTP 桃園國際機場 2016–2025 逐時觀測（82,958 筆）。測站在基地北方約 7.8 km、較近海，基地風速應較低。流線為示意。',
+  cam:{t:[CENTER[0]+20,CENTER[1],20],d:780,az:205,el:50},
+  labels:['wNE','wCorner','wFace','wStreet'], layers:{wind:true},
+  mount:()=>mountWind()},
+
+ {key:'view',nav:'視野',
+  title:'西北望公園，<br>遠看站前',
+  body:'<p>B 棟臨青商路一側朝西北，視線越過對街可看到公七公園、站前開發用地與高鐵站方向。拖曳右側樓層：低樓層看到的多是行道樹與公園樹冠，越往上越能越過周邊塔樓。</p>',
+  stats:[['131','m','至公園中心'],['471','m','至開發用地中心'],['862','m','至高鐵站']],
+  side:()=>`<div class="card"><h3>視點樓層</h3>
+    <div class="readout"><div><b id="vF">--</b><span>樓層</span></div><div><b id="vH">--</b><span>視點高度</span></div></div>
+    <div class="slider-row"><input type="range" id="vRange" min="2" max="21" step="1" aria-label="樓層"></div>
+    <p>視點位於 B 棟西北立面，朝 318° 方向（高鐵站方位）。</p></div>`,
+  foot:'視點與樓高為推估；周邊塔樓高度依 OSM 建物類型推估，實際遮擋以現場為準。',
+  cam:()=>viewCam(viewFloor),
+  labels:['vPark','vPar','vHsr'], layers:{},
+  mount:()=>mountView()},
+
+ {key:'skyline',nav:'天際線',
+  title:'禾林 RICH ONE<br>三部曲',
+  body:'<p>禾林在青埔連續推出三案。一代 RICH ONE 規模最大，基地約 1,647 坪、208 戶；2.0 基地約 737 坪、14 層，以類清水模外觀與 3.45 m 挑高為特色；RICH ONE 3 是 21 層、75 戶的精簡塔樓。</p>',
+  side:()=>'<div class="card"><h3>立面比較（同一比例）</h3><svg id="sky" viewBox="0 0 300 250" role="img" aria-label="禾林三案高度比較"></svg></div>',
+  foot:'資料：禾林建築官網、樂居、591。高度以 1F 4.5 m、標準層 3.3 m 示意（2.0 以 3.45 m 計）。RICH ONE 3 完工年依樂居與 591 推估。',
+  cam:{t:[CENTER[0],CENTER[1],40],d:600,az:312,el:5},
+  labels:['A2','B2'], layers:{}},
+
+ {key:'transit',nav:'交通',
+  title:'步行 14 分鐘，<br>高鐵與機捷共站',
+  body:'<p>沿高鐵站前西路往西北，依 OpenStreetMap 路網計算的最短步行路徑約 <b>1,082 公尺</b>，以每分鐘 80 公尺計約 14 分鐘，可到達高鐵桃園站與機場捷運 A18。</p>',
+  stats:[['1,082','m','步行路徑'],['≈14','min','步行時間'],['862','m','直線距離']],
+  extra:()=>`<div class="legend"><div><span class="sw line" style="border-color:var(--accent)"></span>步行最短路徑</div><div><span class="sw" style="background:var(--bldg)"></span>機場捷運高架段</div></div>`,
+  foot:'路徑以 OpenStreetMap 道路與人行道網路計算，終點為車站周邊步道節點；實際出入口位置可能讓距離略有差異。',
+  cam:{t:[-330,320,0],d:1500,az:214,el:54},
+  labels:['route','hsr2','site','ikea','gloria'], layers:{route:true}},
+
+ {key:'market',nav:'行情',
+  title:'278 筆成交，<br>近一年約 64 萬/坪',
+  body:'<p>591 實價登錄共 278 筆。預售期最低約 <b>29.5 萬/坪</b>（2014-01），2019-05 達到最高 <b>80.0 萬/坪</b>；近一年均價 64.2 萬/坪。</p><p>右圖為最近 20 筆成交；模型上以色帶標出成交樓層，顏色越深單價越高。</p>',
+  stats:[['64.2','萬','近一年均價（每坪）'],['80.0','萬','歷史最高（2019-05）'],['278','筆','實價登錄']],
+  side:()=>`<div class="card"><h3>最近 20 筆成交單價（萬/坪）</h3><svg id="px" viewBox="0 0 300 220" role="img" aria-label="成交單價散布圖"></svg>
+    <div class="legend" style="border:0;padding:0;flex-direction:row;flex-wrap:wrap;gap:12px"><div><span class="sw" style="background:var(--r2);width:10px;height:10px;border-radius:50%"></span>2 房</div><div><span class="sw" style="background:var(--r3);width:10px;height:10px;border-radius:50%"></span>3 房</div><div><span class="sw" style="background:var(--r4);width:10px;height:10px;border-radius:50%"></span>4 房</div><div><span class="sw" style="background:transparent;border:1.5px solid var(--ink3);width:10px;height:10px;border-radius:50%"></span>特殊交易</div></div></div>`,
+  foot:'資料：591 實價登錄，2026-11-11 更新。單價已扣除車位；特殊交易以空心點表示。',
+  cam:{t:[CENTER[0]-6,CENTER[1]+6,36],d:320,az:356,el:11},
+  labels:['A','B'], layers:{tx:true}},
+
+ {key:'future',nav:'未來',
+  title:'西北側的<br>3.2 萬坪站前開發',
+  body:'<p>國泰人壽主導的高鐵桃園站前開發案於 <b>2025 年 9 月 30 日</b>動土，基地約 3.2 萬坪，規劃 5 棟複合大樓，引進百貨商場、辦公與星級飯店，預計 <b>2030 年</b>完工。</p><p>OpenStreetMap 將這塊地標為「高速鐵路桃園車站特定區事業發展用地」，最近處距本案約 190 公尺。</p>',
+  stats:[['3.2','萬坪','開發面積'],['5','棟','複合大樓'],['2030','','預計完工']],
+  foot:'資料：經濟日報、工商時報 2025-09-30 報導。圖中 5 棟量體僅為示意，不代表實際設計。',
+  cam:{t:[-150,230,40],d:980,az:146,el:27},
+  labels:['par','ghost','site','hsr'], layers:{future:'all'}},
+
+ {key:'summary',nav:'結語',
+  title:'一張圖看<br>RICH ONE',
+  body:'<p>站前一公里、公園第一排的 L 型雙塔。東南面採光最好，西北面看公園但要處理夏季西曬；東北季風沿青商路吹，A 棟東南角是風環境的重點。</p>',
+  extra:()=>`<div class="sumgrid">
+    <div><b>862 m</b><span>高鐵桃園站・機捷 A18</span></div><div><b>131 m</b><span>青埔公七公園</span></div>
+    <div><b>22F／21F</b><span>L 型雙塔、208 戶</span></div><div><b>7.8 h</b><span>冬至東南面日照</span></div>
+    <div><b>NE 23.5%</b><span>全年主導風向</span></div><div><b>64.2 萬</b><span>近一年均價（每坪）</span></div></div>
+    <ul class="src">
+    <li><a href="https://holin-arch.com.tw/case-detail.php?id=6&type=classic" target="_blank" rel="noopener">禾林建築官網</a>：基地面積、樓層、坪數、公設</li>
+    <li>青埔建案資訊站（痞客邦，2018-05）：戶數、公設比、車位、構造、建築設計、營造</li>
+    <li><a href="https://market.591.com.tw/36671" target="_blank" rel="noopener">591 實價登錄</a>（2026-11-11 更新）：成交、單價、建築完成日</li>
+    <li><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>：建物、道路、公園、軌道</li>
+    <li><a href="https://mesonet.agron.iastate.edu/" target="_blank" rel="noopener">Iowa Environmental Mesonet</a>：RCTP 2016–2025 逐時風</li>
+    <li>經濟日報、工商時報（2025-09-30）：國泰站前開發；天下雜誌、Bella：IKEA、華泰名品城</li></ul>`,
+  cam:{t:[CENTER[0]-80,CENTER[1]+120,20],d:1150,az:210,el:36,orbit:true},
+  labels:['site','park','hsr','cathay'], layers:{future:'parcel',parkHi:true}}
+];
+CH.forEach((c,i)=>c.num=String(i).padStart(2,'0'));
+
+/* ---------------- chapter widgets ---------------- */
+function tlGo(i,keepCam){
+  tlIndex=(i+TIMELINE.length)%TIMELINE.length; const t=TIMELINE[tlIndex];
+  document.querySelectorAll('.tl-item').forEach((b,k)=>{b.classList.toggle('on',k===tlIndex); b.classList.toggle('past',k<tlIndex);});
+  const card=document.getElementById('tlCard');
+  if(card) card.innerHTML=`<div class="bigyear">${t.y}</div><div class="ttl">${t.t}</div><p>${t.d}</p>
+    <div class="row"><button class="btn" id="tlP">◀ 上一個</button><button class="btn" id="tlN">下一個 ▶</button></div>`;
+  const p=document.getElementById('tlP'), n=document.getElementById('tlN');
+  if(p) p.onclick=()=>{tlGo(tlIndex-1); userTouched();}; if(n) n.onclick=()=>{tlGo(tlIndex+1); userTouched();};
+  const xy=t.at==='site'?CENTER:PLACES[t.at].xy;
+  MARK.position.copy(W3(xy[0],xy[1],1.6)); MARK.visible=true;
+  LB.mark.pos.copy(W3(xy[0],xy[1],t.at==='site'?84:30));
+  LB.mark.el.querySelector('.tx').innerHTML=t.y+'<small>'+t.t+'</small>';
+  FUT.visible=true; PAR.ghost.visible=(t.at==='cathay'&&tlIndex===TIMELINE.length-1);
+  const near=t.at==='site'?{t:[CENTER[0],CENTER[1],20],d:620,az:205,el:36}:{t:[xy[0],xy[1],10],d:t.at==='cathay'?1100:800,az:200,el:42};
+  if(!keepCam) setCam(near);
+}
+function mountSun(){
+  const rr=document.getElementById('sRange'); const bars=document.getElementById('sBars');
+  const segs=[...document.querySelectorAll('[data-doy]')];
+  function draw(){
+    const s=setSun(sunState.doy,sunState.hour,true);
+    const hh=Math.floor(sunState.hour), mm=Math.round((sunState.hour-hh)*60);
+    document.getElementById('sT').textContent=String(hh).padStart(2,'0')+':'+String(mm%60).padStart(2,'0');
+    document.getElementById('sAl').textContent=s.alt>0?s.alt.toFixed(1)+'°':'—';
+    document.getElementById('sAz').textContent=s.az.toFixed(0)+'°';
+    document.getElementById('sSh').textContent=s.alt>1?Math.round(towerH(22)/Math.tan(s.alt*DEG))+' m':'—';
+    rr.value=sunState.hour;
+  }
+  function day(doy){
+    sunState.doy=doy; segs.forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.doy===doy)));
+    const [r,s]=riseSet(doy); const f=x=>String(Math.floor(x)).padStart(2,'0')+':'+String(Math.round((x%1)*60)%60).padStart(2,'0');
+    document.getElementById('sRise').textContent='日出 '+f(r)+'　日落 '+f(s);
+    const hrs=facadeHours(doy);
+    bars.innerHTML=FACADES.map((fc,i)=>`<div class="bar"><span>${fc.k}</span><span class="tr"><i style="width:${(hrs[i]/14*100).toFixed(1)}%"></i></span><em>${hrs[i].toFixed(1)} h</em></div>`).join('');
+    draw();
+  }
+  segs.forEach(b=>b.addEventListener('click',()=>{day(+b.dataset.doy); userTouched();}));
+  rr.addEventListener('input',()=>{sunState.hour=+rr.value; sunPlay=false; document.getElementById('sPlay').textContent='▶'; draw(); userTouched();});
+  document.getElementById('sPlay').addEventListener('click',e=>{sunPlay=!sunPlay; e.currentTarget.textContent=sunPlay?'❚❚':'▶'; userTouched();});
+  sunState.hour=9.5; day(355);
+  CUR.sunDraw=draw;
+}
+function mountShadow(){
+  const rr=document.getElementById('hRange'), pb=document.getElementById('hPlay');
+  shadowAuto=true; sunState.doy=355; sunState.hour=7.6;
+  function draw(){ const s=setSun(355,sunState.hour,false); const hh=Math.floor(sunState.hour),mm=Math.round((sunState.hour-hh)*60)%60;
+    document.getElementById('hT').textContent=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+    document.getElementById('hSh').textContent=s.alt>1?Math.round(towerH(22)/Math.tan(s.alt*DEG))+' m':'—'; rr.value=sunState.hour; }
+  rr.addEventListener('input',()=>{shadowAuto=false; pb.textContent='▶'; pb.setAttribute('aria-pressed','false'); sunState.hour=+rr.value; draw(); userTouched();});
+  pb.addEventListener('click',()=>{shadowAuto=!shadowAuto; pb.textContent=shadowAuto?'❚❚':'▶'; pb.setAttribute('aria-pressed',String(shadowAuto)); userTouched();});
+  draw(); CUR.shadowDraw=draw;
+}
+const DIRS=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+const DIRZH={N:'北',NNE:'北北東',NE:'東北',ENE:'東北東',E:'東',ESE:'東南東',SE:'東南',SSE:'南南東',S:'南',SSW:'南南西',SW:'西南',WSW:'西南西',W:'西',WNW:'西北西',NW:'西北',NNW:'北北西'};
+function mountWind(){
+  const segs=[...document.querySelectorAll('[data-w]')];
+  const months=document.getElementById('wMonths');
+  months.innerHTML=Object.keys(WIND.monthly).sort((a,b)=>a-b).map(m=>{const t=WIND.monthly[m].top; const ne=['NE','NNE','ENE'].includes(t); return `<div class="${ne?'ne':'sw2'}" title="${m} 月：${DIRZH[t]}風">${ne?'NE':'SW'}</div>`;}).join('');
+  function draw(mode){
+    windMode=mode; segs.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.w===mode)));
+    const S=WIND.season[mode]; const svg=document.getElementById('rose');
+    const max=40, R=92; const sc=f=>Math.sqrt(f/max)*R;
+    let h='';
+    for(const r of [10,20,30,40]){h+=`<circle r="${sc(r).toFixed(1)}" fill="none" stroke="var(--rule)"/>`; h+=`<text x="3" y="${(-sc(r)-2).toFixed(1)}" font-size="7.5" fill="var(--ink3)">${r}%</text>`;}
+    h+=`<line x1="0" y1="-${R+6}" x2="0" y2="${R+6}" stroke="var(--rule)"/><line x1="-${R+6}" y1="0" x2="${R+6}" y2="0" stroke="var(--rule)"/>`;
+    // 青商路 axis 42°
+    const a=42.3*DEG; h+=`<line x1="${(-Math.sin(a)*(R+10)).toFixed(1)}" y1="${(Math.cos(a)*(R+10)).toFixed(1)}" x2="${(Math.sin(a)*(R+10)).toFixed(1)}" y2="${(-Math.cos(a)*(R+10)).toFixed(1)}" stroke="var(--accent)" stroke-dasharray="4 3"/>`;
+    h+=`<text x="${(Math.sin(a)*(R+2)+4).toFixed(1)}" y="${(-Math.cos(a)*(R+2)+12).toFixed(1)}" font-size="8" fill="var(--accent)">青商路</text>`;
+    S.freq.forEach((f,i)=>{ if(f<=0) return; const c=i*22.5*DEG, w=9*DEG, r=sc(f);
+      const p1=[Math.sin(c-w)*r,-Math.cos(c-w)*r], p2=[Math.sin(c+w)*r,-Math.cos(c+w)*r];
+      const op=(0.35+Math.min(1,S.spd[i]/9)*0.65).toFixed(2);
+      h+=`<path d="M0 0L${p1[0].toFixed(1)} ${p1[1].toFixed(1)}A${r.toFixed(1)} ${r.toFixed(1)} 0 0 1 ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}Z" fill="var(--wind)" fill-opacity="${op}" stroke="var(--bg)" stroke-width=".6"/>`; });
+    for(const [t,x,y] of [['N',0,-R-10],['E',R+11,3],['S',0,R+15],['W',-R-11,3]]) h+=`<text x="${x}" y="${y}" font-size="9" text-anchor="middle" fill="var(--ink2)">${t}</text>`;
+    svg.innerHTML=resv(h);
+    let top=0; S.freq.forEach((f,i)=>{if(f>S.freq[top]) top=i;});
+    document.getElementById('wDir').innerHTML=DIRS[top]+' <small style="font-size:13px">'+S.freq[top].toFixed(1)+'%</small>';
+    document.getElementById('wMean').innerHTML=S.mean.toFixed(1)+'<small style="font-size:12px"> m/s</small>';
+    const fromDeg=top*22.5; wind.setDir(fromDeg);
+    const summer=(mode==='JJA');
+    LB.wNE.el.querySelector('.tx').innerHTML=summer?'西南偏西風<small>WSW・'+S.freq[top].toFixed(1)+'%</small>':'東北季風<small>'+DIRS[top]+'・'+S.freq[top].toFixed(1)+'%</small>';
+    const up=fromDeg*DEG; LB.wNE.pos.copy(W3(CENTER[0]+Math.sin(up)*250,CENTER[1]+Math.cos(up)*250,40));
+    LB.wCorner.el.querySelector('.tx').innerHTML=summer?'角隅加速<small>A 棟西北角</small>':'角隅加速<small>A 棟東南角</small>';
+    const cp=summer?uv(18,15):uv(36,57); LB.wCorner.pos.copy(W3(cp[0],cp[1],20));
+    LB.wFace.el.querySelector('.tx').innerHTML=summer?'迎風立面<small>A 棟西南面</small>':'迎風立面<small>A 棟東北面</small>';
+    const fp=summer?uv(18,36):uv(37,30); LB.wFace.pos.copy(W3(fp[0],fp[1],55));
+  }
+  segs.forEach(b=>b.addEventListener('click',()=>{draw(b.dataset.w); userTouched();}));
+  draw(windMode);
+}
+function mountView(){
+  const rr=document.getElementById('vRange');
+  function draw(){ rr.value=viewFloor; document.getElementById('vF').textContent=viewFloor+'F'; document.getElementById('vH').textContent=(floorBase(viewFloor)+1.6).toFixed(0)+' m'; }
+  rr.addEventListener('input',()=>{viewFloor=+rr.value; draw(); setCam(Object.assign(viewCam(viewFloor),{dur:600})); userTouched();});
+  draw();
+}
+function drawSky(){
+  const svg=document.getElementById('sky'); if(!svg) return;
+  const g0=212, s=2.45; // px per m
+  const items=[
+    {x:22,w:30,h:towerH(22),lab:'A 棟',f:'22F'},{x:58,w:42,h:towerH(21),lab:'B 棟',f:'21F'},
+    {x:142,w:36,h:4.5+13*3.45,lab:'',f:'14F'},
+    {x:218,w:32,h:towerH(21),lab:'',f:'21F'}];
+  let h=`<line x1="6" y1="${g0}" x2="294" y2="${g0}" stroke="var(--ink)"/>`;
+  for(const m of [20,40,60,80]){const y=g0-m*s; h+=`<line x1="6" y1="${y}" x2="294" y2="${y}" stroke="var(--rule)" stroke-dasharray="2 3"/><text x="292" y="${y-3}" font-size="7.5" text-anchor="end" fill="var(--ink3)">${m} m</text>`;}
+  items.forEach((b,i)=>{
+    const y=g0-b.h*s; const isMain=i<2;
+    h+=`<rect x="${b.x}" y="${y.toFixed(1)}" width="${b.w}" height="${(b.h*s).toFixed(1)}" fill="${isMain?'var(--glass)':'var(--chip)'}" stroke="var(--ink)" stroke-width=".8"/>`;
+    const fl=parseInt(b.f); const fh=(b.h*s)/fl;
+    for(let k=1;k<fl;k++){const yy=g0-k*fh; h+=`<line x1="${b.x}" y1="${yy.toFixed(1)}" x2="${b.x+b.w}" y2="${yy.toFixed(1)}" stroke="var(--ink)" stroke-opacity=".18" stroke-width=".6"/>`;}
+    h+=`<text x="${b.x+b.w/2}" y="${(y-4).toFixed(1)}" font-size="8" text-anchor="middle" fill="var(--ink)">${b.f}</text>`;
+  });
+  const cap=(x,t1,t2,t3)=>`<text x="${x}" y="${g0+12}" font-size="8.5" text-anchor="middle" fill="var(--ink)" font-weight="500">${t1}</text><text x="${x}" y="${g0+22}" font-size="7.5" text-anchor="middle" fill="var(--ink3)">${t2}</text><text x="${x}" y="${g0+31}" font-size="7.5" text-anchor="middle" fill="var(--ink3)">${t3}</text>`;
+  svg.setAttribute('viewBox','0 0 300 250');
+  h+=cap(61,'RICH ONE','208 戶・1,647 坪','2017');
+  h+=cap(160,'RICH ONE 2.0','104 戶・737 坪','2020');
+  h+=cap(234,'RICH ONE 3','75 戶・607 坪','約 2025');
+  svg.innerHTML=resv(h);
+}
+function drawPx(){
+  const svg=document.getElementById('px'); if(!svg) return;
+  const x0=34,x1=290,y0=196,y1=14; const t0=Date.UTC(2023,5,1), t1=Date.UTC(2026,8,1);
+  const X=d=>{const [a,b,c]=d.split('-').map(Number); return x0+(Date.UTC(a,b-1,c)-t0)/(t1-t0)*(x1-x0);};
+  const Y=v=>y0-(v-25)/(85-25)*(y0-y1);
+  let h='';
+  for(const v of [30,40,50,60,70,80]) h+=`<line x1="${x0}" y1="${Y(v)}" x2="${x1}" y2="${Y(v)}" stroke="var(--rule)"/><text x="${x0-5}" y="${Y(v)+3}" font-size="8" text-anchor="end" fill="var(--ink3)">${v}</text>`;
+  for(const yr of [2024,2025,2026]){const x=X(yr+'-01-01'); h+=`<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0+4}" stroke="var(--ink3)"/><text x="${x}" y="${y0+14}" font-size="8" text-anchor="middle" fill="var(--ink3)">${yr}</text>`;}
+  h+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="var(--ink3)"/>`;
+  const ref=(v,t,dash,anchorEnd)=>`<line x1="${x0}" y1="${Y(v)}" x2="${x1}" y2="${Y(v)}" stroke="var(--accent)" stroke-dasharray="${dash}"/><text x="${anchorEnd?x1:x0+3}" y="${Y(v)-4}" font-size="7.5" text-anchor="${anchorEnd?'end':'start'}" fill="var(--accent)">${t}</text>`;
+  h+=ref(80,'歷史最高 80.0（2019-05）','1 3',true);
+  h+=ref(64.2,'近一年均價 64.2','5 3',false);
+  h+=ref(29.5,'預售最低 29.5（2014-01）','1 3',true);
+  const cm={'2房':'var(--r2)','3房':'var(--r3)','4房':'var(--r4)'};
+  for(const r of TX){ const x=X(r[0]), y=Y(r[5]);
+    h+=r[6]?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="var(--bg)" stroke="var(--ink3)" stroke-width="1.3"><title>${r[0]}｜${r[1]}號 ${r[2]}F｜${r[3]} ${r[4]}坪｜${r[5]} 萬/坪（特殊交易）</title></circle>`
+         :`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.8" fill="${cm[r[3]]}" stroke="var(--bg)" stroke-width="1"><title>${r[0]}｜${r[1]}號 ${r[2]}F｜${r[3]} ${r[4]}坪｜${r[5]} 萬/坪</title></circle>`; }
+  svg.innerHTML=resv(h);
+}
+
+/* ---------------- chapter switching ---------------- */
+const panel=document.getElementById('panel'), side=document.getElementById('side');
+const navEl=document.getElementById('chapters');
+navEl.innerHTML=CH.map((c,i)=>`<button class="navb" data-i="${i}"><span>${c.num}</span>${c.nav}</button>`).join('');
+navEl.querySelectorAll('.navb').forEach(b=>b.addEventListener('click',()=>{go(+b.dataset.i); userTouched();}));
+let cur=-1; const CUR={};
+function go(i,instant){
+  i=Math.max(0,Math.min(CH.length-1,i)); const c=CH[i]; cur=i;
+  CUR.sunDraw=null; CUR.shadowDraw=null; sunPlay=false;
+  panel.innerHTML=`<div class="eyebrow in"><span class="num">${c.num}</span><span>${c.nav}</span></div>
+    ${c.kicker?`<p class="kicker in">${c.kicker}</p>`:''}
+    <h1 class="in">${c.title}</h1>${c.sub?`<p class="sub in">${c.sub}</p>`:''}
+    <div class="lead in">${c.body}</div>
+    ${c.stats?'<div class="in">'+stats(c.stats)+'</div>':''}
+    ${c.extra?'<div class="in" style="display:flex;flex-direction:column;gap:14px">'+c.extra()+'</div>':''}
+    ${c.foot?`<p class="foot">${c.foot}</p>`:''}`;
+  panel.scrollTop=0;
+  if(c.side){side.innerHTML=c.side(); side.hidden=false; app.classList.add('has-side'); side.querySelectorAll('.card').forEach(x=>x.classList.add('in'));}
+  else{side.innerHTML=''; side.hidden=true; app.classList.remove('has-side');}
+  const ui=document.getElementById('ui'); if(ui) ui.scrollTop=0;
+  navEl.querySelectorAll('.navb').forEach((b,k)=>{ if(k===i){b.setAttribute('aria-current','step'); b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});} else b.removeAttribute('aria-current'); });
+  // layers
+  const L=c.layers||{};
+  RINGS.visible=!!L.rings; ROUTE.visible=!!L.route; G.wind.visible=!!L.wind; SUN.visible=!!L.sunDome; BASE.visible=!!L.basement; TXB.visible=!!L.tx;
+  FUT.visible=!!L.future; PAR.ghost.visible=L.future==='all'; MARK.visible=!!L.marker;
+  M.parkHi.opacity=L.parkHi?.55:0; parkHiMesh.visible=!!L.parkHi;
+  stackMode=!!L.stack; recolorStack(); M.retail.opacity=.9;
+  TOWER.A.ret.material=stackMode?M.retail:M.glass; TOWER.B.ret.material=stackMode?M.retail:M.glass;
+  M.glass.opacity=L.tx?.38:(stackMode?.5:.66); M.glassA.opacity=M.glass.opacity;
+  TOWER.B.g.visible=!L.hideB;
+  for(const lb of LABELS) lb.on=(c.labels||[]).includes(lb.id);
+  if(c.key==='timeline'){} else MARK.visible=!!L.marker;
+  if(!['sun','shadow'].includes(c.key)) setSun(DEF_SUN.doy,DEF_SUN.hour,false);
+  const cam=typeof c.cam==='function'?c.cam():c.cam;
+  setCam(cam,instant);
+  if(c.mount) c.mount();
+  if(c.key==='skyline') drawSky();
+  if(c.key==='market'){ recolorTx(); drawPx(); }
+  try{ history.replaceState(null,'','#'+c.key); }catch(e){}
+}
+function next(){go(cur+1);} function prev(){go(cur-1);}
+document.getElementById('bNext').addEventListener('click',()=>{next(); userTouched();});
+document.getElementById('bPrev').addEventListener('click',()=>{prev(); userTouched();});
+addEventListener('keydown',e=>{
+  if(e.target&&(e.target.tagName==='INPUT')) return;
+  if(e.key===' '&&e.target&&e.target.tagName==='BUTTON') return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault(); next(); userTouched();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault(); prev(); userTouched();}
+  else if(e.key==='f'||e.key==='F'){toggleFull();}
+  else if(e.key==='Home'){go(0);}
+});
+// autoplay
+const bAuto=document.getElementById('bAuto');
+function stopAuto(){ if(autoTimer){clearInterval(autoTimer); autoTimer=null;} bAuto.setAttribute('aria-pressed','false'); }
+function userTouched(){ const h=document.getElementById('draghint'); if(h) h.style.opacity=0; }
+bAuto.addEventListener('click',()=>{
+  if(autoTimer){stopAuto(); return;}
+  bAuto.setAttribute('aria-pressed','true');
+  autoTimer=setInterval(()=>{ if(cur>=CH.length-1) go(0); else next(); },9000);
+});
+['pointerdown','wheel'].forEach(ev=>canvas.addEventListener(ev,()=>{ if(autoTimer) stopAuto(); }));
+// theme
+document.getElementById('bTheme').addEventListener('click',()=>{
+  root.setAttribute('data-theme',isDark()?'light':'dark'); applyTheme(); refreshWidgets();
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ if(!root.getAttribute('data-theme')){applyTheme(); refreshWidgets();} });
+function refreshWidgets(){ const c=CH[cur]; if(!c) return; if(c.key==='wind') mountWind(); if(c.key==='skyline') drawSky(); if(c.key==='market') drawPx(); if(c.key==='sun'&&CUR.sunDraw) CUR.sunDraw(); }
+// fullscreen
+function toggleFull(){ try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} }
+document.getElementById('bFull').addEventListener('click',toggleFull);
+
+/* ============================================================
+   RESIZE + LOOP
+   ============================================================ */
+let VW=0,VH=0;
+function resize(){
+  VW=app.clientWidth; VH=app.clientHeight;
+  if(renderer) renderer.setSize(VW,VH,false);
+  camera.aspect=VW/VH;
+  if(NARROW()) camera.setViewOffset(VW,VH,0,VH*0.24,VW,VH);
+  else camera.setViewOffset(VW,VH,-VW*0.13,0,VW,VH);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize',resize);
+const v3=new THREE.Vector3();
+const needle=document.getElementById('needle');
+const scaleT=document.getElementById('scaleT'), scaleB=document.getElementById('scaleB');
+function updateLabels(){
+  for(const L of LABELS){
+    if(!L.on){ if(L.shown){L.el.style.display='none'; L.shown=false;} continue; }
+    v3.copy(L.pos).project(camera);
+    const ok=v3.z<1&&v3.z>-1&&Math.abs(v3.x)<1.15&&Math.abs(v3.y)<1.15;
+    if(!ok){ if(L.shown){L.el.style.display='none'; L.shown=false;} continue; }
+    const x=(v3.x*.5+.5)*VW, y=(-v3.y*.5+.5)*VH;
+    L.el.style.transform=`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0)`;
+    if(!L.shown){L.el.style.display='block'; L.shown=true;}
+  }
+}
+let last=performance.now(), routeT=0;
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  const c=CH[cur]||{};
+  if(c.cam&&c.cam.orbit&&!tw&&!pts.size&&!matchMedia('(prefers-reduced-motion: reduce)').matches) rig.az+=dt*2.2;
+  updateRig(now);
+  if(G.wind.visible) wind.step(dt,1);
+  if(ROUTE.visible){ routeT+=dt*90; const dots=ROUTE.userData.dots; const m4=new THREE.Matrix4(); const Lr=routeCum[routeCum.length-1];
+    for(let i=0;i<dots.count;i++){const p=routeAt(routeT+i*Lr/dots.count); m4.makeTranslation(p[0],2.4,-p[1]); dots.setMatrixAt(i,m4);} dots.instanceMatrix.needsUpdate=true; }
+  if(MARK.visible){ const k=(now/1400)%1; MARK.userData.r2.scale.setScalar(1+k*1.8); MARK.userData.r2.material.opacity=0.9; }
+  if(c.key==='sun'&&sunPlay&&CUR.sunDraw){ sunState.hour+=dt*1.2; const [r,s]=riseSet(sunState.doy); if(sunState.hour>s+0.3) sunState.hour=r-0.2; CUR.sunDraw(); }
+  if(c.key==='shadow'&&shadowAuto&&CUR.shadowDraw){ sunState.hour+=dt*0.75; if(sunState.hour>16.6) sunState.hour=7.4; CUR.shadowDraw(); }
+  if(renderer) renderer.render(scene,camera);
+  updateLabels();
+  // compass + scale
+  needle.setAttribute('transform',`rotate(${(-(rig.az-180)).toFixed(1)})`);
+  const mpp=2*rig.d*Math.tan(camera.fov/2*DEG)/VH; const opts=[20,50,100,200,500,1000]; let m=opts[0]; for(const o of opts){ if(o/mpp<=110) m=o; }
+  scaleT.textContent=m>=1000?(m/1000)+' km':m+' m'; scaleB.style.width=Math.max(8,m/mpp).toFixed(0)+'px';
+  requestAnimationFrame(loop);
+}
+/* ============================================================
+   BOOT
+   ============================================================ */
+applyTheme(); resize();
+const start=Math.max(0,CH.findIndex(c=>'#'+c.key===location.hash));
+go(start,true);
+addEventListener('hashchange',()=>{const k=CH.findIndex(c=>'#'+c.key===location.hash); if(k>=0&&k!==cur) go(k);});
+requestAnimationFrame(loop);
+setTimeout(()=>{const h=document.getElementById('draghint'); if(h) h.style.opacity=0;},9000);
+})();
+</script>
